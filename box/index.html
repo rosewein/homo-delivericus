@@ -1,0 +1,795 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="description" content="택배 상자, 우유, 분유, 치킨. 주문된 물건이 되어 문 앞까지 가 봅니다. 2~3분이면 끝납니다.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="이번에는 당신이 배송됩니다">
+<meta property="og:description" content="문 앞까지 · 주문된 물건이 되어 보는 실험실">
+<meta property="og:image" content="https://lab.holidaybooks.co.kr/box/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://lab.holidaybooks.co.kr/box/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='8' y='14' width='48' height='38' rx='4' fill='%23ACA9AA' stroke='%23231F20' stroke-width='3'/%3E%3Crect x='9.5' y='23' width='45' height='7' fill='%23A83D5F'/%3E%3C/svg%3E">
+<style>:root{color-scheme:light;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}body{margin:0;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>문 앞까지</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@600;700&display=swap">
+<style>
+/* 레이아웃: 휴대폰 한 손 폭의 세로 한 단. 위에는 지나온 길, 가운데는 그림 한 장과 장면 카드, 끝은 운송장 한 장. */
+:root{
+  --paper:#F2F1EF; --surface:#FBFAF9; --ink:#231F20; --muted:#5E5A5B; --line:#CBC7C7;
+  --rasp:#A83D5F; --on-rasp:#FFFFFF; --box:#ACA9AA; --night:#2A2526; --moon:#F2F1EF;
+  --sans:'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic','Noto Sans CJK KR',sans-serif;
+  --serif:'Noto Serif KR','AppleMyungjo','Batang','Noto Serif CJK KR',serif;
+  --mono:'IBM Plex Mono','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#1A1718; --surface:#252122; --ink:#EFEDEA; --muted:#ABA6A7; --line:#443E40;
+    --rasp:#E0779A; --on-rasp:#1A1718; --box:#6F6A6B; --night:#0E0C0D; --moon:#EFEDEA; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#1A1718; --surface:#252122; --ink:#EFEDEA; --muted:#ABA6A7; --line:#443E40;
+  --rasp:#E0779A; --on-rasp:#1A1718; --box:#6F6A6B; --night:#0E0C0D; --moon:#EFEDEA; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.65;word-break:keep-all;overflow-wrap:anywhere}
+#app{display:flex;flex-direction:column;gap:16px}
+.wrap{max-width:560px;margin:0 auto;padding-inline:16px;padding-block:0 56px;display:flex;flex-direction:column;gap:20px}
+h1,h2,p,ol,ul,figure{margin:0}
+h1,h2{text-wrap:balance}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--rasp);outline-offset:2px}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:.02em}
+
+/* 위쪽 막대와 지나온 길 */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);border-bottom:2px solid var(--ink);margin-inline:-16px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.bar-name{font-weight:900;font-size:15px;letter-spacing:.02em}
+.bar-side{font-size:13px}
+.steps{display:grid;gap:4px}
+.step{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:12.5px;font-weight:700;color:var(--muted);text-align:center;line-height:1.3}
+.step i{display:block;width:100%;height:6px;border-radius:3px;background:var(--line)}
+.step.done{color:var(--ink)} .step.done i{background:var(--ink)}
+.step.now{color:var(--rasp)} .step.now i{background:var(--rasp)}
+
+/* 처음 화면 */
+.intro{display:flex;flex-direction:column;gap:22px;padding-top:28px}
+.eyebrow{font-family:var(--mono);font-size:12.5px;color:var(--muted);letter-spacing:.04em}
+.intro h1{font-size:clamp(44px,13vw,62px);font-weight:900;line-height:1.12;letter-spacing:-.02em}
+.intro h1 em{font-style:normal;color:var(--rasp)}
+.hook{font-size:clamp(19px,5.6vw,23px);font-weight:900;line-height:1.35;text-wrap:balance}
+.lead{font-size:17px}
+.pick-h{font-weight:900;font-size:17px}
+.pick{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.pick button{display:flex;flex-direction:column;align-items:stretch;gap:6px;padding:10px 12px 12px;border:2px solid var(--ink);border-radius:14px;background:var(--surface);cursor:pointer;text-align:left;transition:transform .12s}
+.pick button:hover{transform:translateY(-2px)}
+.pick button:active{transform:translateY(1px)}
+.pick b{font-weight:900;font-size:16px;line-height:1.3}
+.pick span{font-size:13px;color:var(--muted);line-height:1.4}
+.pick .been{color:var(--rasp);font-weight:700}
+.fact{display:flex;flex-direction:column;gap:4px;padding-block:14px;border-block:2px dashed var(--line)}
+.fact b{font-weight:900}
+.src{font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+
+/* 그림 */
+.fig{line-height:0}
+.art{display:block;width:100%;height:auto;border-radius:10px;background:var(--paper);border:1.5px solid var(--line)}
+.pick .art{border:0;background:transparent}
+
+/* 장면 카드 */
+.card{border:2px solid var(--ink);border-radius:16px;background:var(--surface);display:flex;flex-direction:column}
+.card.me{border-color:var(--rasp);border-width:4px}
+.card-main{padding:18px;display:flex;flex-direction:column;gap:14px}
+.stamp{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:13px;color:var(--muted)}
+.card.me .stamp span:last-child{color:var(--rasp);font-weight:700}
+.card h2{font-size:26px;font-weight:900;line-height:1.25;letter-spacing:-.01em}
+.choices{display:flex;flex-direction:column;gap:10px}
+.choice{display:flex;align-items:center;width:100%;text-align:left;min-height:56px;padding:12px 14px;border:2px solid var(--ink);border-radius:12px;background:var(--paper);cursor:pointer;font-weight:700;transition:transform .12s}
+.choice:hover{transform:translateY(-1px)}
+.choice:active{transform:translateY(1px)}
+.choice.one{justify-content:center;background:var(--rasp);border-color:var(--rasp);color:var(--on-rasp);font-weight:900;font-size:20px;min-height:64px}
+.row{display:flex;flex-wrap:wrap;gap:10px}
+.btn{min-height:46px;padding:10px 18px;border:2px solid var(--ink);border-radius:12px;background:var(--ink);color:var(--paper);font-weight:700;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink)}
+.link{border:0;background:none;padding:10px 0;min-height:44px;cursor:pointer;font-weight:700;color:var(--rasp);text-decoration:underline;text-underline-offset:3px}
+a.link{display:inline-flex;align-items:center}
+.picked{font-weight:700}
+.picked::before{content:"→ ";color:var(--rasp)}
+
+/* 결과: 운송장 */
+.bill{border:6px solid var(--rasp);border-radius:20px;background:var(--surface);padding:20px 18px;display:flex;flex-direction:column;gap:16px}
+.bill-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-weight:900;letter-spacing:.04em;font-size:14px;padding-bottom:10px;border-bottom:3px solid var(--rasp)}
+.bill-top span:last-child{color:var(--rasp)}
+.verdict{display:flex;flex-direction:column;gap:12px}
+.bill h2{font-size:19px;font-weight:900;line-height:1.35}
+.sent{font-size:clamp(22px,6.4vw,28px);font-weight:900;line-height:1.38;text-wrap:balance}
+.sent em{font-style:normal;color:var(--rasp)}
+.crowd{font-size:15px;font-weight:700;color:var(--rasp)}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px}
+.stat{display:flex;flex-direction:column;gap:0;border-top:2px solid var(--ink);padding-top:6px}
+.stat span{font-size:13px;color:var(--muted)}
+.stat b{font-family:var(--mono);font-size:30px;line-height:1.2;font-weight:500}
+.stat b small{font-family:var(--sans);font-size:14px;font-weight:700;margin:0 4px 0 2px}
+.trace{display:flex;flex-direction:column;gap:8px;padding-top:14px;border-top:2px dashed var(--line)}
+.trace-h{font-weight:900;font-size:14px}
+.trace ol,.trace ul{list-style:none;padding:0;display:flex;flex-direction:column;gap:4px;font-size:15px}
+.trace ol li{display:grid;grid-template-columns:3.4em minmax(0,1fr);gap:10px}
+.trace ol li span{color:var(--muted)}
+.trace.unseen .trace-h{color:var(--rasp)}
+.trace ul li{display:grid;grid-template-columns:1em minmax(0,1fr);gap:6px;font-weight:700}
+.trace ul li::before{content:"·";color:var(--rasp);font-weight:900}
+.after{display:flex;flex-direction:column;gap:6px;font-size:17px;font-weight:700;padding-top:14px;border-top:2px dashed var(--line)}
+.ask{font-family:var(--serif);font-weight:700;font-size:clamp(23px,6.8vw,29px);line-height:1.4;text-wrap:balance}
+.rx{display:flex;flex-direction:column;gap:8px;padding:16px;border:2px solid var(--ink);border-radius:12px;background:var(--paper)}
+.rx-h{font-weight:900;font-size:14px;color:var(--rasp);letter-spacing:.02em}
+.rx-t{font-size:clamp(22px,6.4vw,28px);font-weight:900;line-height:1.3;text-wrap:balance}
+.half b{display:block;font-weight:900;margin-bottom:4px}
+.buy{display:flex;flex-direction:column;gap:10px}
+.buy-h{font-weight:900;font-size:17px}
+a.btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+.buy a.btn{flex:1 1 90px;padding-inline:8px;white-space:nowrap}
+.acts{display:flex;flex-direction:column;gap:10px}
+.acts .row .btn{flex:1 1 90px}
+.acts .again{align-self:center}
+.bill-foot{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;padding-top:12px;border-top:2px dashed var(--line)}
+.title-line{font-size:14px;line-height:1.5}
+.title-line b{display:block;font-size:17px;font-weight:900;color:var(--rasp)}
+.caution{flex:none;border:2.5px solid var(--rasp);color:var(--rasp);font-weight:900;font-size:13px;padding:3px 9px;border-radius:5px;transform:rotate(-3deg)}
+.bc{height:34px;background:repeating-linear-gradient(90deg,var(--ink) 0 3px,transparent 3px 5px,var(--ink) 5px 6px,transparent 6px 10px,var(--ink) 10px 14px,transparent 14px 16px,var(--ink) 16px 17px,transparent 17px 21px)}
+.shot img{display:block;width:100%;border-radius:12px;border:2px solid var(--line)}
+.note{font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
+.toast{font-size:14px;font-weight:700;color:var(--rasp);min-height:1.65em}
+@media (prefers-reduced-motion: reduce){
+  .choice,.pick button{transition:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="app" aria-live="polite"></div>
+  <p class="note">김철민의 책 『호모 딜리버리쿠스』(홀리데이북스)를 바탕으로 만든 실험입니다. 장면은 지어낸 이야기입니다.<span id="collect" hidden> 결과는 이름 없이 숫자로만 모읍니다.</span></p>
+</div>
+
+<script>
+/*CORE-START*/
+const D = 1440, hm = (d, h, m) => d * D + h * 60 + m;
+const clock = t => { const x = ((t % D) + D) % D; return `${String(Math.floor(x / 60)).padStart(2, '0')}:${String(x % 60).padStart(2, '0')}`; };
+const span = m => (m >= 60 ? `${Math.floor(m / 60)}시간${m % 60 ? ` ${m % 60}분` : ''}` : `${m}분`);
+const STAR = { s5: 5, s4: 4, s3: 3, s1: 1, s0: 0 };
+const STAR_WORD = { 5: '다섯', 4: '네', 3: '세', 1: '한' };
+const starPick = (n, last) => ({ id: 's' + n, label: n ? `별 ${STAR_WORD[n]} 개를 누른다` : last,
+  out: n ? `별 ${STAR_WORD[n]} 개가 채워진다. “소중한 평가 감사합니다.”` : null });
+
+const ROUTES = {
+  box: {
+    id: 'box', name: '택배 상자', was: '였다', into: '택배 상자가', sub: '내일 도착', icon: 'iBox', days: true,
+    steps: ['주문', '밤길', '택배 차', '주차장', '문 앞'], order: hm(0, 21, 40), doorArt: 'door',
+    track: s => [[hm(0, 21, 40), '주문 접수'], [hm(0, 23, 50), '이동 중'], [arrive(s), '배송 완료']],
+    scenes: [
+      { step: 0, at: hm(0, 21, 40), where: '물류센터', title: '운송장', art: 'pack', hands: ['담는 손'], go: '실린다',
+        body: '누군가 결제 버튼을 눌렀다. 손 하나가 책 한 권을 당신 안에 넣고 테이프를 두른다. 옆구리에 운송장이 붙는다. 이제 당신은 이름 대신 번호로 불린다.' },
+      { step: 1, at: hm(0, 23, 50), where: '화물 트럭', title: '밤길', art: 'truck', hands: ['싣는 손'], go: '내려진다',
+        body: '다른 상자들 틈에 끼어 트럭에 쌓인다. 문이 닫히고 캄캄해진다. 밤새 흔들린다. 어디를 지나는지 당신은 모른다.' },
+      { step: 2, at: hm(1, 12, 40), where: '택배 차', title: '200개 중 하나', art: 'van', hands: ['택배 기사'],
+        body: '아침에 택배 기사의 차로 옮겨졌다. 오늘 이 차가 돌아야 할 상자는 200개쯤, 도는 순서는 단말기가 정했다. 지금 남은 것은 121개. 기사가 운전석에서 김밥 한 줄을 푼다.',
+        choices: [
+          { id: 'eat', label: '기사는 김밥을 다 먹고 출발한다', late: 10, unseen: '김밥 한 줄을 다 먹는 데 쓴 10분',
+            out: '10분이 지난다. 단말기의 숫자는 그대로 121이다. 기사가 시동을 건다.' },
+          { id: 'go', label: '기사는 두 개만 집어 먹고 출발한다', unseen: '조수석에 남은 김밥 여덟 개',
+            out: '남은 김밥이 조수석에 놓인다. 차가 움직인다. 다음 집 앞에서 숫자가 120이 된다.' }
+        ] },
+      { step: 3, at: hm(1, 14, 20), drift: true, where: '아파트 지하 주차장', title: '지하 주차장', art: 'cart',
+        body: '이 단지는 택배 차가 지상으로 다닐 수 없다. 기사는 지하에서 당신을 카트에 옮겨 싣는다. 바퀴 소리가 주차장에 울린다. 엘리베이터는 17층에 서 있다. 당신은 4층으로 간다.',
+        choices: [
+          { id: 'lift', label: '기사는 엘리베이터를 기다린다', late: 6, unseen: '엘리베이터 앞에서 기다린 6분',
+            out: '17, 16, 15. 숫자가 층마다 멈추며 내려온다. 기사는 단말기를 들여다본다.' },
+          { id: 'stairs', label: '기사는 당신을 안고 계단으로 오른다', unseen: '상자를 안고 걸어 오른 4층 계단', set: { stairs: 1 },
+            out: '한 층, 두 층. 숨소리가 가까이에서 들린다. 당신은 그의 팔 안에서 흔들린다.' }
+        ] },
+      { step: 4, at: hm(1, 14, 26), drift: true, arrive: true, where: '4층 복도', title: '문 앞', art: 'door', go: '문 안쪽으로',
+        body: '기사가 당신을 문 앞에 내려놓는다. 찰칵, 사진을 찍는다. 발소리가 멀어진다. 그에게는 아직 백 개쯤 되는 상자가 남아 있다.' },
+      { step: 4, at: hm(1, 14, 26), drift: true, me: true, final: true, where: '문 안쪽', title: '문자 한 통', art: 'msg',
+        body: '이제 당신은 그 상자를 주문한 사람이다. 휴대폰에 문자가 와 있다. “문 앞에 놓고 갔습니다.” 복도에서 발소리가 아직 들린다.',
+        choices: [
+          { id: 'open', label: '문을 열고 “수고하셨습니다” 하고 말한다', seen: 1,
+            out: '문을 연다. 기사가 돌아본다. “수고하셨습니다.” 그가 고개를 숙이고 다시 걷는다. 3초쯤 걸렸다.' },
+          { id: 'later', label: '문자만 확인한다. 상자는 이따가 들인다',
+            out: '화면을 끈다. 발소리가 사라진다. 상자는 저녁까지 문 앞에 있다.' }
+        ] }
+    ]
+  },
+  dawn: {
+    id: 'dawn', name: '새벽배송 우유', was: '였다', into: '새벽배송 우유가', sub: '아침 7시 전 도착', icon: 'iMilk', days: true,
+    steps: ['주문', '캠프', '공동현관', '문 앞'], order: hm(0, 22, 58), doorArt: 'doorbag',
+    track: s => [[hm(0, 22, 58), '주문 접수'], [hm(1, 1, 30), '캠프 도착'], [arrive(s), '배송 완료']],
+    scenes: [
+      { step: 0, at: hm(0, 22, 58), where: '물류센터', title: '마감 2분 전', art: 'shelf', hands: ['집는 손'], go: '옮겨진다',
+        body: '밤 11시 마감을 2분 남기고 주문이 들어왔다. 축구장 수십 개만 한 물류센터, 수십만 가지 물건 사이에서 손 하나가 당신을 집는다. 계란, 빵과 함께 보냉가방에 담긴다.' },
+      { step: 1, at: hm(1, 1, 30), where: '캠프', title: '캠프', art: 'camp', hands: ['나누는 손'], go: '실린다',
+        body: '한밤에 도심 가까운 ‘캠프’에 내려진다. 동네별로 한 번 더 나뉜다. 당신이 탈 차가 정해진다. 기사의 단말기에 오늘 돌 집들이 순서대로 뜬다. 모두 아침 7시 전이다.' },
+      { step: 2, at: hm(1, 4, 38), where: '공동현관', title: '공동현관', art: 'lobby', hands: ['배송 기사'],
+        body: '새벽 4시 반. 오는 길은 비어 있었다. 이 건물에서 깨어 있는 사람은 기사 한 명뿐이다. 주문서에 적힌 공동현관 비밀번호를 누른다. 문이 열리지 않는다. 번호가 바뀐 모양이다.',
+        choices: [
+          { id: 'call', label: '기사는 주문한 사람에게 전화를 건다', late: 2, set: { woke: 1 }, unseen: '새벽 4시 38분에 걸어야 했던 전화',
+            out: '신호가 여섯 번 간다. 잠긴 목소리가 번호 네 자리를 부른다. 전화는 바로 끊긴다. 문이 열린다.' },
+          { id: 'guard', label: '기사는 경비실 인터폰을 누른다', late: 4, unseen: '자다가 인터폰을 받은 경비원',
+            out: '한참 만에 경비원이 받는다. 말없이 문이 열린다. 기사는 인터폰에 대고 고개를 숙인다.' },
+          { id: 'round', label: '기사는 다른 동부터 돌고 다시 온다', late: 31, unseen: '같은 건물을 두 번 찾아온 길',
+            out: '당신은 다시 차에 실린다. 다른 집 문 앞에 가방이 하나씩 놓인다. 5시가 넘어 돌아왔을 때, 일찍 나서는 주민이 문을 잡아 준다.' }
+        ] },
+      { step: 3, at: hm(1, 4, 44), drift: true, arrive: true, where: '9층 복도', title: '문 앞', art: 'doorbag', go: '문 안쪽으로',
+        body: '보냉가방이 문 앞에 놓인다. 찰칵. 복도 센서등이 꺼진다. 아침까지는 이 가방이 당신의 냉장고다.' },
+      { step: 3, at: hm(1, 6, 27), me: true, final: true, where: '문 안쪽', title: '알림', art: 'msg',
+        body: s => `이제 당신은 그 우유를 주문한 사람이다. 알림이 울린다. “새벽배송이 도착했습니다.” ${s.flags.woke ? '새벽에 전화를 받고 한 번 깼던 일이 떠오른다.' : '밖은 아직 어둡다.'}`,
+        choices: [
+          { id: 'fix', label: '공동현관 번호가 바뀐 것이 생각나, 주문서의 번호를 고친다',
+            out: '주문 정보를 열어 네 자리를 고친다. 20초쯤 걸렸다.' },
+          { id: 'complain', when: s => s.flags.woke, label: '고객센터에 “새벽 전화는 곤란하다”고 남긴다',
+            out: '문의란에 한 줄을 적어 보낸다. “접수되었습니다.” 그 한 줄이 누구에게 가는지는 화면에 나오지 않는다.' },
+          { id: 'none', label: '가방을 들이고 우유를 따른다',
+            out: '가방을 들인다. 우유는 차갑다. 누가 언제 다녀갔는지는 모른다.' }
+        ] }
+    ]
+  },
+  quick: {
+    id: 'quick', name: '한밤중의 분유', was: '였다', into: '한밤중의 분유가', sub: '12분 뒤 도착', icon: 'iCan',
+    steps: ['주문', '편의점', '골목', '문 앞'], order: hm(0, 23, 42), doorArt: 'hook',
+    track: s => [[hm(0, 23, 42), '주문 접수'], [hm(0, 23, 45) + (s.flags.guest ? 2 : 0), '픽업'],
+      [arrive(s), s.late ? `배송 완료 · 예정보다 ${s.late}분 늦음` : '배송 완료 · 예정대로']],
+    scenes: [
+      { step: 0, at: hm(0, 23, 42), where: '어느 집', title: '요청 사항', art: 'note',
+        body: '한밤중, 어느 집에서 분유가 떨어졌다. 아기가 운다. 주문하는 사람의 손가락이 ‘요청 사항’ 칸 위에서 멈춘다.',
+        choices: [
+          { id: 'fast', label: '“최대한 빨리 부탁드려요”라고 적는다', set: { note: '최대한 빨리 부탁드려요' } },
+          { id: 'slow', label: '“천천히 안전하게 오세요”라고 적는다', set: { note: '천천히 안전하게 오세요' } },
+          { id: 'blank', label: '아무것도 적지 않는다' }
+        ].map(c => ({ ...c, out: '주문 버튼이 눌린다. 그 집에서 가장 가깝고 재고가 있는 편의점으로 주문이 넘어간다. 점원이 선반에서 당신을 꺼내 봉투에 담는다.' })) },
+      { step: 1, at: hm(0, 23, 45), where: '편의점', title: '계산대', art: 'counter', hands: ['점원', '라이더'],
+        body: '봉투에 ‘퀵커머스 배송 상품’ 딱지가 붙는다. 헬멧을 쓴 라이더가 들어와 픽업 번호를 부른다. 같은 순간, 손님 하나가 계산대에 컵라면을 올려놓는다. 점원은 혼자다.',
+        choices: [
+          { id: 'rider', label: '점원은 라이더에게 당신을 먼저 건넨다', set: { riderFirst: 1 }, unseen: '계산대 앞에서 순서를 내준 손님',
+            out: '손님은 컵라면을 든 채 기다린다. 당신은 라이더의 손으로 넘어간다. 문에 달린 종이 울린다.' },
+          { id: 'guest', label: '점원은 손님 계산부터 한다', late: 2, set: { guest: 1 }, unseen: '라이더가 계산대 옆에서 기다린 2분',
+            out: '바코드 찍는 소리가 난다. 라이더는 화면의 남은 시간을 본다. 2분 뒤, 당신이 그의 손으로 넘어간다.' }
+        ] },
+      { step: 2, at: hm(0, 23, 47), drift: true, where: '골목', title: '남은 시간', art: 'ride',
+        unseen: s => (s.flags.note ? [`“${s.flags.note}”라고 적어도 그대로였던 남은 시간`] : []),
+        body: s => `배달통 뚜껑이 닫힌다. 라이더의 화면에 남은 시간은 ${7 - s.late}분. 내비가 그린 큰길로는 9분이 걸린다. ${s.flags.note ? `화면 아래에 요청 사항이 작게 떠 있다. “${s.flags.note}.” ` : ''}그는 이 동네 골목을 20년 다녔다.`,
+        choices: [
+          { id: 'navi', label: '라이더는 내비가 그린 길로 간다', late: 2, unseen: '알면서도 가지 않은 지름길',
+            out: '큰길 신호에 두 번 걸린다. 화면의 숫자가 빨갛게 바뀐다.' },
+          { id: 'cut', label: '라이더는 아는 골목으로 질러간다', set: { off: 1 }, unseen: '화면에 남은 ‘경로 이탈’ 기록',
+            out: '골목 두 개를 가로지른다. 화면에 ‘경로 이탈’이 뜬다. 그 기록이 다음 배차에 어떻게 돌아올지 그는 모른다.' }
+        ] },
+      { step: 3, at: hm(0, 23, 54), drift: true, arrive: true, where: '현관 앞', title: '문 앞', art: 'hook', go: '문 안쪽으로',
+        body: '봉투가 문고리에 걸린다. 벨은 누르지 않는다. 라이더가 사진을 찍고 완료를 누른다. 다음 콜이 바로 뜬다.' },
+      { step: 3, at: hm(0, 23, 55), drift: true, me: true, final: true, where: '문 안쪽', title: '배달은 어떠셨나요?', art: 'stars',
+        body: s => `이제 당신은 그 분유를 주문한 사람이다. 알림이 뜬다. “문 앞에 놓고 갔습니다.” ${s.late ? `앱이 알려 준 시간보다 ${s.late}분 늦었다.` : '앱이 알려 준 시간에 맞춰 왔다.'} 아기는 아직 운다. 화면에 별 다섯 개가 비어 있다.`,
+        choices: [starPick(5), starPick(4), starPick(3),
+          { ...starPick(0, '평가하지 않고 분유부터 탄다'), out: '앱을 닫고 물을 끓인다. 별은 빈 채로 남는다.' }] }
+    ]
+  },
+  food: {
+    id: 'food', name: '금요일 저녁의 치킨', was: '이었다', into: '금요일 저녁의 치킨이', sub: '31분 뒤 도착', icon: 'iBag', fixedLate: 16,
+    steps: ['콜', '주방', '길', '문 앞'], order: hm(0, 19, 2), doorArt: 'fooddoor',
+    track: () => [[hm(0, 19, 2), '주문 접수'], [hm(0, 19, 27), '픽업'], [hm(0, 19, 49), '배송 완료 · 예정보다 16분 늦음']],
+    scenes: [
+      { step: 0, at: hm(0, 19, 12), where: '치킨집', title: '콜', art: 'accept', hands: ['튀기는 손'],
+        body: '당신은 아직 기름 속에 있다. 가게 밖에 서 있던 라이더의 휴대폰이 울린다. 화면에는 가져갈 곳, 가져다줄 곳, 걸릴 시간, 갈 길이 이미 그려져 있다.',
+        choices: [{ id: 'accept', label: '수락', one: true, out: '라이더가 가게로 들어와 주방 앞에 선다. 그의 앞에 헬멧 둘이 먼저 서 있다.' }] },
+      { step: 1, at: hm(0, 19, 20), where: '치킨집 주방 앞', title: '주방 앞', art: 'kitchen', hands: ['라이더'], unseen: ['가게에서 늦게 나온 7분'], go: '실린다',
+        body: '금요일 저녁, 주문이 몰린다. 주문서에 적힌 조리 완료 시각은 19시 20분. 당신이 봉투에 담겨 라이더의 손에 넘어간 것은 19시 27분이다. 화면의 시계는 19시 20분부터 돌고 있었다.' },
+      { step: 2, at: hm(0, 19, 40), where: '아파트 단지', title: '302동 1104호', art: 'wrong', unseen: ['잘못 적힌 주소를 찾아 돈 9분'], go: '다시 실린다',
+        body: '라이더가 302동 1104호의 벨을 누른다. 낯선 사람이 문을 연다. “안 시켰는데요.” 라이더가 주문한 사람에게 전화를 건다. “아, 320동이에요. 잘못 눌렀네요.” 320동은 단지 반대편이다.' },
+      { step: 3, at: hm(0, 19, 49), arrive: true, where: '320동 11층', title: '문 앞', art: 'fooddoor',
+        body: '봉투가 문 앞에 놓인다. 라이더의 화면에는 ‘16분 늦음’이 빨갛게 떠 있다. 문 안쪽에서 목소리가 들린다. “문 앞에 두고 가세요.”',
+        choices: [
+          { id: 'msg', label: '라이더는 “늦어서 죄송합니다. 맛있게 드세요” 하고 메시지를 보낸다', set: { msg: 1 }, unseen: '평점이 깎일까 봐 빼먹지 않는 한 줄',
+            out: '메시지가 간다. 읽음 표시는 뜨지 않는다. 완료를 누르자 다음 콜이 뜬다.' },
+          { id: 'done', label: '라이더는 완료만 누르고 돌아선다', unseen: '완료를 누르자마자 뜬 다음 콜',
+            out: '완료를 누른다. 숨 돌릴 틈 없이 다음 콜이 뜬다. 그는 엘리베이터 버튼을 누른다.' }
+        ] },
+      { step: 3, at: hm(0, 19, 50), me: true, final: true, where: '문 안쪽', title: '배달은 어떠셨나요?', art: 'stars',
+        body: s => `이제 당신은 그 치킨을 주문한 사람이다. 치킨은 앱이 알려 준 시간보다 16분 늦었고, 조금 식었다. ${s.flags.msg ? '“늦어서 죄송합니다. 맛있게 드세요.” 메시지가 와 있다. ' : ''}화면에 별 다섯 개가 비어 있다.`,
+        choices: [starPick(5), starPick(4), starPick(1),
+          { ...starPick(0, '평가하지 않고 치킨부터 먹는다'), out: '앱을 닫고 봉투를 연다. 별은 빈 채로 남는다.' }] }
+    ]
+  }
+};
+const ORDER = ['box', 'dawn', 'quick', 'food'];
+
+function fresh() { return { phase: 'intro', route: null, i: 0, pick: null, late: 0, hands: [], unseen: [], flags: {}, picks: [], final: null, seen: 0 }; }
+const val = (v, s) => (typeof v === 'function' ? v(s) : v);
+const route = s => ROUTES[s.route];
+const scene = s => route(s).scenes[s.i];
+const options = (s, sc = scene(s)) => (sc.choices || []).filter(c => !c.when || c.when(s));
+function enter(s, i) {
+  s.i = i; s.pick = null;
+  const sc = scene(s);
+  s.t0 = sc.at + (sc.drift ? s.late : 0);
+  for (const h of sc.hands || []) if (!s.hands.includes(h)) s.hands.push(h);
+  for (const u of val(sc.unseen, s) || []) s.unseen.push(u);
+}
+function begin(s, id) { Object.assign(s, fresh(), { phase: 'scene', route: id }); enter(s, 0); return s; }
+function choose(s, c) {
+  const sc = scene(s);
+  s.late += c.late || 0;
+  if (c.unseen) s.unseen.push(c.unseen);
+  Object.assign(s.flags, c.set || {});
+  s.picks.push(c.id);
+  if (sc.final) { s.final = c.id; s.seen = c.seen || 0; }
+}
+const at = (s, sc = scene(s)) => sc.at + (sc.drift ? s.late : 0);
+function arrive(s) { const sc = route(s).scenes.find(x => x.arrive); return sc.at + (sc.drift ? s.late : 0); }
+const lateOf = s => route(s).fixedLate ?? s.late;
+const elapsed = s => arrive(s) - route(s).order;
+const when = (s, t) => (route(s).days ? (t < D ? '어제 ' : '오늘 ') : '') + clock(t);
+function headline(s) { const r = route(s); return `나는 ${r.name}${r.was}. 손 ${s.hands.length}개를 거쳐 ${span(elapsed(s))} 만에 문 앞에 놓였다.`; }
+
+const STAR_LINE = {
+  5: '받는 사람은 별 다섯 개를 눌렀다. 이 시스템에서 별 다섯 개는 ‘최고’가 아니라 ‘기본’이다.',
+  4: '받는 사람은 별 네 개를 눌렀다. 이 시스템에서 별 네 개는 ‘보통’이 아니라 ‘위험 신호’다.',
+  3: '받는 사람은 별 세 개를 눌렀다. 이 시스템에서 별 세 개는 ‘불만’이 아니라 ‘탈락 예고’다.',
+  1: '받는 사람은 별 한 개를 눌렀다. 그 별은 가게도 주소도 아닌 라이더의 평점에 남는다.',
+  0: '받는 사람은 평가하지 않았다. 별은 빈 채로 남았다.'
+};
+function lines(s) {
+  const f = s.final, n = STAR[f];
+  if (s.route === 'box') return { text: [f === 'open' ? '문이 열렸고, “수고하셨습니다” 한마디가 건너갔다.' : '문은 열리지 않았다. 문자 한 통이 읽혔다.'] };
+  if (s.route === 'dawn') return { text: [{
+    fix: '받는 사람은 공동현관 번호를 고쳐 두었다. 다음 새벽에는 그 문이 한 번에 열린다.',
+    complain: '받는 사람은 고객센터에 한 줄을 남겼다. 바뀐 번호를 알리지 않은 쪽은 받는 사람이었다.',
+    none: '받는 사람은 가방을 들였다. 누가 다녀갔는지는 끝내 모른다.' }[f]] };
+  const src = n >= 3 ? '『호모 딜리버리쿠스』 166쪽' : '';
+  if (s.route === 'quick') return { text: [
+    (s.late ? `분유는 앱이 알려 준 시간보다 ${s.late}분 늦게 도착했다.` : '분유는 앱이 알려 준 시간에 도착했다.') + (s.flags.off ? ' 시간을 맞추려고 벗어난 길은 ‘경로 이탈’로 남았다.' : ''),
+    STAR_LINE[n]], src };
+  return { text: ['늦은 16분 가운데 7분은 가게에서, 9분은 잘못 적힌 주소에서 생겼다.', STAR_LINE[n]], src };
+}
+
+const CH = {
+  7: ['편의점은 더 이상 당신을 기다리지 않는다', 73], 10: ['새벽배송의 대가, 속도가 삼킨 것들', 96],
+  11: ['도심 물류의 보이지 않는 전쟁', 103], 18: ['배달 기사는 노동자가 아니라 알고리즘 실행 유닛이다', 150],
+  20: ['별점은 평가가 아니라 생존 점수다', 163], 27: ['인간은 이제 시스템의 변수다', 212]
+};
+const STAR_WHY = {
+  5: '별 다섯 개가 왜 ‘최고’가 아니라 ‘기본’인지 나오는 장입니다.', 4: '별 네 개가 왜 ‘보통’이 아닌지 나오는 장입니다.',
+  3: '별 세 개가 무엇을 예고하는지 나오는 장입니다.', 1: '라이더 탓이 아닌 일이 왜 라이더의 별점이 되는지 나오는 장입니다.'
+};
+function rx(s) {
+  const n = STAR[s.final]; let ch, why;
+  if (s.route === 'box') [ch, why] = s.flags.stairs ? [27, '화면 위의 점 하나가 계단을 오르는 사람이라는 이야기가 나오는 장입니다.'] : [11, '지하 주차장에서 카트를 끄는 사람들이 나오는 장입니다.'];
+  else if (s.route === 'dawn') [ch, why] = [10, '당신이 자는 동안의 새벽이 누구의 시간인지 묻는 장입니다.'];
+  else if (s.route === 'quick') {
+    if (n === 4 || n === 3) [ch, why] = [20, STAR_WHY[n]];
+    else if (s.flags.riderFirst) [ch, why] = [7, '손님보다 배달 기사를 먼저 맞는 편의점이 나오는 장입니다.'];
+    else [ch, why] = [18, '20년 다닌 지름길을 두고 내비를 따르는 이유가 나오는 장입니다.'];
+  } else [ch, why] = n ? [20, STAR_WHY[n]] : [18, '버튼이 ‘수락’ 하나뿐인 화면이 나오는 장입니다.'];
+  return { ch, title: CH[ch][0], page: CH[ch][1], why };
+}
+const FIN_VERB = {
+  open: '문을 열었습니다', later: '문자만 확인했습니다', fix: '공동현관 번호를 고쳤습니다', complain: '고객센터에 글을 남겼습니다', none: '가방만 들였습니다',
+  s5: '별 다섯 개를 눌렀습니다', s4: '별 네 개를 눌렀습니다', s3: '별 세 개를 눌렀습니다', s1: '별 한 개를 눌렀습니다', s0: '평가하지 않았습니다'
+};
+
+/* 그림: 320×170 한 장. 선과 색은 글과 같은 토큰을 쓴다. 문자열만 만들기 때문에 화면과 결과 이미지가 같은 그림을 쓴다. */
+const p = (d, c = 'st') => `<path class="${c}" d="${d}"/>`;
+const r = (x, y, w, h, c = 'st fp', rx = 2) => `<rect class="${c}" x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}"/>`;
+const o = (x, y, rad, c = 'st fp') => `<circle class="${c}" cx="${x}" cy="${y}" r="${rad}"/>`;
+const t = (x, y, str, size = 12, c = '', a = 'middle') => `<text class="${c}" x="${x}" y="${y}" font-size="${size}" text-anchor="${a}">${str}</text>`;
+const g = (x, y, inner, k = 1) => `<g transform="translate(${x} ${y})${k === 1 ? '' : ` scale(${k})`}">${inner}</g>`;
+const ground = (y = 150, a = 8, b = 312) => p(`M${a} ${y}H${b}`);
+const night = (h = 60, mx = 276) => `<rect class="fnight" x="0" y="0" width="320" height="${h}"/>` + o(mx, 24, 10, 'fmoon') + [[36, 18], [92, 38], [150, 14], [206, 40], [304, 50]].map(([x, y]) => o(x, y, 1.3, 'fmoon')).join('');
+const windowNight = (x, y) => `<rect class="fnight" x="${x}" y="${y}" width="46" height="56" rx="2"/>` + o(x + 30, y + 18, 7, 'fmoon') + r(x, y, 46, 56, 'st', 2) + p(`M${x + 23} ${y}v56M${x} ${y + 28}h46`, 'st s2');
+
+const BOX = (w = 56, h = 42, me = false) => r(0, -h, w, h, 'st fb', 3) + `<rect class="${me ? 'fr' : 'fp'}" x="1.1" y="${-h + Math.round(h * .2)}" width="${w - 2.2}" height="${Math.max(4, Math.round(h * .13))}"/>` +
+  (me && h >= 38 ? r(w - 25, -h + Math.round(h * .46), 19, 13, 'st s2 fp', 1.5) + p(`M${w - 22} ${-h + Math.round(h * .46) + 5}h13m-13 4h8`, 'st s2') : '');
+const MILK = () => p('M0 0V-30L7 -41H19L26 -30V0Z', 'st fp') + p('M7 -41V-46H19V-41M0 -30H26', 'st s2') + r(5, -22, 16, 10, 'fr', 2);
+const CAN = () => r(0, -36, 34, 36, 'st fp', 4) + p('M-2 -36H36V-41a3 3 0 0 0-3-3H1a3 3 0 0 0-3 3Z', 'st fb') + `<rect class="fr" x="1.1" y="-25" width="31.8" height="11"/>`;
+const BAG = (steam, me = true) => p('M0 0V-34L5 -42H35L40 -34V0Z', 'st fp') + p('M0 -34H40M13 -42c0-10 14-10 14 0', 'st s2') + (me ? r(13, -24, 14, 9, 'fr', 2) : '') +
+  (steam ? p('M10 -52c-3-4 3-6 0-10M20 -54c-3-4 3-6 0-10M30 -52c-3-4 3-6 0-10', 'st s2 sr') : '');
+const COOL = (me = true) => r(0, -34, 54, 34, 'st fp', 6) + p('M0 -24H54M17 -34c0-12 20-12 20 0', 'st') + (me ? r(21, -17, 12, 9, 'fr', 2) : '');
+const WHO = (helmet, cap) => p('M-11 0V-30a11 11 0 0 1 22 0V0Z', 'st fp') + o(0, -52, 9, helmet ? 'st fk' : 'st fp') + (helmet ? p('M-5 -51h10', 'st s2 sm') : '') + (cap ? p('M-10 -55a10 10 0 0 1 20 0h7', 'st fk') : '');
+const MITT = () => r(-8, -46, 16, 28, 'st fb', 2) + p('M-10 -18h20v12a10 10 0 0 1-20 0Z', 'st fp') + p('M10 -13c7 0 7 9 0 9', 'st fp');
+const DOOR = num => r(-5, -117, 72, 117, 'st fn', 2) + r(0, -112, 62, 112, 'st fp', 2) + r(46, -66, 9, 22, 'st fk', 2) + o(31, -84, 2.2, 'fk') + (num ? t(31, -95, num, 10) : '');
+const WHEEL = (x, rad = 10) => o(x, -rad - 1, rad, 'st fk') + o(x, -rad - 1, rad * .35, 'fp');
+const SCOOT = () => WHEEL(-26, 8.5) + WHEEL(28, 8.5) + p('M-26 -10H4L11 -24H-18Z', 'st fb') + p('M17 -42L28 -10M10 -44H23', 'st') +
+  r(-47, -52, 26, 24, 'st fp', 3) + `<rect class="fr" x="-45.9" y="-46" width="23.8" height="5"/>` +
+  p('M-19 -24V-40a9 9 0 0 1 15-6L11 -42', 'st fp') + o(-10, -59, 8.5, 'st fk') + p('M-6 -58h9', 'st s2 sm');
+const STARP = (cx, cy, R = 15, q = 6.6) => 'M' + Array.from({ length: 10 }, (_, k) => { const a = -Math.PI / 2 + k * Math.PI / 5, d = k % 2 ? q : R; return `${(cx + d * Math.cos(a)).toFixed(1)} ${(cy + d * Math.sin(a)).toFixed(1)}`; }).join('L') + 'Z';
+const banner = (x, y, text, w = 190) => g(x, y, r(0, 0, w, 48, 'st fp', 12) + r(10, 10, 28, 28, 'fr', 7) + t(48, 21, '알림', 9, 'tm', 'start') + t(48, 37, text, 12, '', 'start'));
+const inside = () => ground() + g(232, 150, r(-5, -117, 72, 117, 'st fn', 2) + r(0, -112, 62, 112, 'st fp', 2) + o(12, -58, 4.5, 'st fk') + o(31, -84, 2.2, 'fk')) + p('M214 156h44', 'st sl');
+const truckLoad = () => { let out = ''; [[0, 4], [1, 4], [2, 3]].forEach(([row, n]) => { for (let k = 0; k < n; k++) out += g(7 + k * 30, -16 - row * 22, BOX(26, 20, row === 1 && k === 2)); }); return out; };
+
+const ART = {
+  iBox: () => p('M14 66H106') + g(32, 66, BOX(56, 42, true)),
+  iMilk: () => p('M14 66H106') + g(45, 66, MILK(), 1.15),
+  iCan: () => p('M14 66H106') + g(41, 66, CAN(), 1.15),
+  iBag: () => p('M14 66H106') + g(40, 66, BAG(true)),
+
+  pack: () => p('M12 46H98M12 86H98M12 126H98', 'st sl') + g(18, 46, BOX(24, 18)) + g(52, 46, BOX(30, 22)) + g(22, 86, BOX(32, 22)) + g(64, 86, BOX(24, 18)) + g(16, 126, BOX(26, 20)) + g(52, 126, BOX(34, 24)) +
+    ground() + g(126, 150, p('M0 -50L-13 -68H20L30 -50M76 -50L89 -68H56L46 -50', 'st fb') + r(0, -50, 76, 50, 'st fb', 3) + `<rect class="fr" x="1.1" y="-30" width="73.8" height="6"/>`) +
+    g(147, 30, r(0, 0, 34, 24, 'st fr', 2) + p('M7 0V24', 'st s2 sm')) + p('M164 62v14', 'st s2 da') +
+    g(224, 30, r(0, 0, 84, 58, 'st fp', 4) + p('M0 17H84', 'st s2') + t(8, 12, '운송장', 9, '', 'start') + p('M10 25v15M14 25v15M20 25v15M23 25v15M29 25v15M36 25v15M39 25v15M45 25v15M52 25v15M55 25v15M61 25v15M68 25v15M73 25v15', 'st s2') + t(42, 52, 'No. 4127-0926', 8, 'tm')) +
+    o(266, 134, 15, 'st fp') + o(266, 134, 6, 'st fn') + p('M252 149h-34', 'st sr'),
+
+  truck: () => night(64) + ground(150) + p('M14 161h22M60 161h22M106 161h22M152 161h22M198 161h22M244 161h22M290 161h16', 'st s2 sl') +
+    g(64, 150, r(0, -86, 130, 72, 'st fp', 3) + truckLoad() + p('M130 -62H154L168 -44V-14H130Z', 'st fp') + r(136, -56, 18, 13, 'st s2 fn', 2) + WHEEL(26) + WHEEL(102) + WHEEL(148)) +
+    p('M236 132h28M236 138h18', 'st s2 sr'),
+
+  van: () => ground() + g(18, 150, r(0, -74, 108, 60, 'st fp', 4) + [[0, 3], [1, 3]].map(([row, n]) => Array.from({ length: n }, (_, k) => g(8 + k * 32, -16 - row * 24, BOX(28, 22, row === 0 && k === 1))).join('')).join('') +
+      p('M108 -56H132L144 -40V-14H108Z', 'st fp') + r(114, -50, 16, 12, 'st s2 fn', 2) + WHEEL(24) + WHEEL(122)) +
+    g(206, 28, r(0, 0, 96, 96, 'st fp', 10) + t(48, 22, '남은 상자', 10, 'tm') + t(48, 58, '121', 32, 'tr') + p('M16 70H80', 'st s2 sl') + t(48, 86, '오늘 200개', 10, 'tm')),
+
+  cart: () => r(14, 14, 24, 136, 'st fl', 2) + r(8, 30, 36, 18, 'st fk', 3) + t(26, 43, 'B1', 11, 'tw') + ground() +
+    g(70, 150, r(0, -15, 80, 5, 'st fk', 2) + o(12, -5, 5) + o(68, -5, 5) + p('M80 -13L90 -72H100', 'st') +
+      g(4, -15, BOX(34, 26)) + g(42, -15, BOX(32, 22)) + g(14, -41, BOX(46, 32, true)) + g(20, -73, BOX(28, 18))) +
+    g(190, 150, WHO(false, true)) +
+    g(232, 150, r(0, -108, 62, 108, 'st fp', 2) + p('M31 -108V0', 'st s2') + r(16, -132, 30, 18, 'st fk', 3) + t(31, -119, '17', 11, 'tw') + o(74, -56, 4, 'st fr')),
+
+  door: () => ground() + g(118, 150, DOOR('402')) + g(198, 150, BOX(56, 42, true)) + p('M110 157h82', 'st sl') +
+    g(276, 86, r(0, 0, 24, 40, 'st fp', 5) + o(12, 14, 5, 'st fn')) + p('M268 96l-12 4M268 108l-13 8M268 120l-10 14', 'st s2 sr'),
+
+  msg: s => inside() + banner(18, 34, s.route === 'dawn' ? '새벽배송이 도착했습니다' : '문 앞에 놓고 갔습니다') + (s.route === 'dawn' ? windowNight(74, 94) : r(36, 141, 20, 9, 'st fb', 4) + r(62, 141, 20, 9, 'st fb', 4)),
+
+  shelf: () => [14, 86].map(x => r(x, 14, 60, 136, 'st fn', 2) + p(`M${x} 48h60M${x} 82h60M${x} 116h60`, 'st s2')).join('') +
+    [[20, 48, 0], [42, 48, 1], [22, 82, 1], [50, 82, 0], [20, 116, 0], [40, 116, 0], [90, 48, 0], [128, 48, 0], [90, 82, 1], [126, 82, 0], [128, 116, 0]].map(([x, y, b]) => (b ? g(x, y, r(0, -18, 20, 18, 'st s2 fb', 2)) : g(x, y, r(0, -24, 14, 24, 'st s2 fp', 2)))).join('') +
+    g(104, 116, MILK(), .72) + g(113.5, 78, MITT(), .9) + ground(150, 8, 312) +
+    g(180, 150, COOL(false)) + g(246, 150, r(0, -16, 44, 16, 'st fb', 4) + p('M8 -16v-3M18 -16v-3M28 -16v-3M38 -16v-3', 'st s2')) +
+    t(250, 44, '22:58', 22, 'tr') + t(250, 62, '주문 마감 23:00', 10, 'tm'),
+
+  camp: () => p('M8 58H230', 'st') + [20, 48, 76, 104, 132, 160, 188, 216].map(x => o(x, 64, 4, 'st s2 fn')).join('') + g(40, 58, COOL(false), .8) + g(130, 58, COOL(), .8) +
+    [0, 1, 2].map(k => { const x = 14 + k * 76; return r(x, 110, 66, 40, 'st s2 fn da', 3) + r(x + 14, 92, 38, 15, 'st fk', 3) + t(x + 33, 103.5, ['1구역', '2구역', '3구역'][k], 9, 'tw') + g(x + 6, 146, COOL(false), .5) + g(x + 34, 146, COOL(false), .5); }).join('') +
+    p('M163 76v10m-5-5l5 5l5-5', 'st sr') + t(276, 44, '01:30', 20, 'tr') +
+    g(246, 150, r(0, -52, 60, 40, 'st fp', 3) + WHEEL(14, 7) + WHEEL(46, 7)) + ground(150, 236, 312),
+
+  lobby: () => night(46) + r(30, 30, 190, 120, 'st fn', 2) + r(30, 30, 190, 16, 'st fb', 2) + r(84, 64, 40, 86, 'st fp', 1) + r(124, 64, 40, 86, 'st fp', 1) + p('M118 100v16M130 100v16', 'st') + ground() +
+    g(196, 150, WHO(false, true)) + g(170, 150, COOL(), .62) +
+    g(244, 150, p('M18 -30V0', 'st') + r(0, -92, 38, 62, 'st fp', 5) + r(6, -86, 26, 13, 'st fk', 2) + t(19, -76, '✕', 9, 'tw') +
+      [0, 1, 2].map(row => [0, 1, 2].map(col => o(9 + col * 10, -62 + row * 9, 2.2, 'fk')).join('')).join('')),
+
+  doorbag: () => windowNight(28, 44) + ground() + g(124, 150, DOOR('903')) + g(204, 150, COOL()) + o(155, 16, 6, 'st fn') + p('M155 28v8M143 24l-6 6M167 24l6 6', 'st s2 sl da'),
+
+  note: s => windowNight(22, 40) + g(92, 12, r(0, 0, 136, 150, 'st fp', 14) + g(16, 38, CAN(), .55) + t(42, 32, '분유 1통', 11, '', 'start') + p('M12 46H124', 'st s2 sl') +
+      t(14, 64, '요청 사항', 10, 'tm', 'start') + r(12, 70, 112, 34, 'st fn', 6) +
+      (s.flags.note ? t(19, 91, s.flags.note, 9.5, '', 'start') : p('M20 79v16', 'st sr')) +
+      r(12, 112, 112, 28, 'fr', 8) + t(68, 131, '주문하기', 12, 'tw')) + t(274, 46, '23:42', 20, 'tr'),
+
+  counter: () => p('M70 30H250M70 58H250', 'st sl') + [78, 100, 122, 190, 212, 234].map((x, k) => g(x, k % 2 ? 58 : 30, r(0, -16, 14, 16, 'st s2 fp', 2))).join('') +
+    g(160, 100, WHO(false)) + r(58, 100, 204, 50, 'st fb', 3) + r(52, 93, 216, 8, 'st fk', 2) +
+    g(96, 93, BAG(false), .8) + g(226, 93, p('M-9 0L-11 -15H11L9 0Z', 'st fp') + p('M-11 -15H11', 'st sr')) + ground() +
+    g(34, 150, WHO(true)) + g(292, 150, WHO(false)),
+
+  ride: s => night(50, 140) + ground() + p('M14 161h22M60 161h22M106 161h22M152 161h22', 'st s2 sl') + g(84, 150, SCOOT()) +
+    g(196, 22, r(0, 0, 110, 96, 'st fp', 10) + p('M16 78V46H62V22H92', 'st') + p('M16 78L92 22', 'st sr da') + o(16, 78, 4.5, 'fk') + o(92, 22, 4.5, 'fr') + t(100, 88, '내비 9분', 10, 'tm', 'end')) +
+    t(251, 140, `남은 시간 ${7 - (s.flags.guest ? 2 : 0)}분`, 13, 'tr'),
+
+  hook: () => windowNight(28, 44) + ground() + g(124, 150, DOOR('1203')) + g(160, 118, BAG(false), .78) +
+    g(236, 150, r(0, -78, 46, 78, 'st fp', 8) + o(23, -44, 12, 'fr') + p('M17 -44l5 5l8-10', 'st sm')),
+
+  accept: () => ground(150, 8, 96) + ground(150, 224, 312) + g(52, 150, SCOOT(), .8) +
+    g(110, 8, r(0, 0, 100, 156, 'st fp', 14) + p('M40 10h20', 'st s2') + r(12, 22, 76, 50, 'st s2 fn', 6) + p('M26 60V40H62V32', 'st') + o(26, 60, 4, 'fk') + o(62, 32, 4, 'fr') +
+      p('M14 84h72M14 94h50', 'st s2 sl') + r(12, 108, 76, 34, 'fr', 9) + t(50, 131, '수락', 16, 'tw')) +
+    t(264, 60, '13분', 24, 'tr') + t(264, 78, '걸릴 시간', 10, 'tm') + p('M240 100h48M240 110h34', 'st s2 sl'),
+
+  kitchen: () => r(96, 20, 212, 76, 'st fn', 3) + p('M110 20v12M126 20v18M142 20v10', 'st s2') + r(104, 32, 12, 16, 'st s2 fp', 1) + r(120, 38, 12, 16, 'st s2 fp', 1) + r(136, 30, 12, 16, 'st s2 fp', 1) +
+    g(212, 96, WHO(false) + r(-8, -72, 16, 12, 'st fp', 3)) + r(238, 62, 58, 34, 'st fb', 3) + p('M250 54c-4-6 4-8 0-14M267 54c-4-6 4-8 0-14M284 54c-4-6 4-8 0-14', 'st s2 sr') +
+    r(88, 96, 224, 54, 'st fb', 3) + r(82, 90, 236, 8, 'st fk', 2) + g(150, 90, BAG(true), .8) + ground(150, 8, 88) +
+    g(22, 150, WHO(true)) + g(47, 150, WHO(true)) + g(72, 150, WHO(true)) + t(44, 40, '19:27', 18, 'tr') + t(44, 56, '예정 19:20', 10, 'tm'),
+
+  wrong: () => ground() + r(22, 34, 76, 116, 'st fp', 2) + r(34, 44, 52, 19, 'st fk', 3) + t(60, 58, '302동', 11, 'tw') + [0, 1, 2].map(row => [0, 1, 2].map(col => r(32 + col * 20, 74 + row * 22, 12, 12, 'st s2 fn', 1)).join('')).join('') +
+    r(236, 50, 66, 100, 'st fp', 2) + r(243, 59, 52, 19, 'fr', 3) + t(269, 73, '320동', 11, 'tw') + [0, 1].map(row => [0, 1].map(col => r(248 + col * 24, 90 + row * 24, 14, 14, 'st s2 fn', 1)).join('')).join('') +
+    g(160, 150, SCOOT(), .9) + p('M104 104C140 70 200 70 232 100', 'st s2 sr da') + t(152, 56, '?', 26, 'tr'),
+
+  fooddoor: s => ground() + g(118, 150, DOOR('1104')) + g(200, 150, BAG(true)) + p('M110 157h82', 'st sl') + (s && s.phase === 'result' ? '' : r(214, 30, 88, 26, 'fr', 7) + t(258, 48, '16분 늦음', 12, 'tw')),
+
+  stars: s => { const n = STAR[s.final] || 0; return inside() + banner(18, 22, '문 앞에 놓고 갔습니다') + [0, 1, 2, 3, 4].map(k => p(STARP(38 + k * 37, 112, 16, 7), k < n ? 'st fr' : 'st fp')).join(''); }
+};
+const artInner = (key, s) => ART[key](s || {});
+/*CORE-END*/
+
+/* 그림 색: 화면에서는 토큰을, 결과 이미지에서는 고정 색을 쓴다. */
+const artCss = (pre, c) => [
+  `.st{fill:none;stroke:${c.ink};stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}`, '.s2{stroke-width:1.5}', '.da{stroke-dasharray:4 5}',
+  `.sr{stroke:${c.rasp}}`, `.sl{stroke:${c.line}}`, `.sm{stroke:${c.surface}}`,
+  `.fp{fill:${c.surface}}`, `.fn{fill:${c.paper}}`, `.fb{fill:${c.box}}`, `.fk{fill:${c.ink}}`, `.fr{fill:${c.rasp}}`, `.fl{fill:${c.line}}`,
+  `.fnight{fill:${c.night}}`, `.fmoon{fill:${c.moon}}`,
+  `text{font-family:'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic','Noto Sans CJK KR',sans-serif;font-weight:900;fill:${c.ink}}`,
+  `text.tr{fill:${c.rasp}}`, `text.tw{fill:${c.onrasp}}`, `text.tm{fill:${c.muted};font-weight:700}`
+].map(x => pre + x).join('\n');
+{
+  const st = document.createElement('style');
+  st.textContent = artCss('.art ', { ink: 'var(--ink)', rasp: 'var(--rasp)', line: 'var(--line)', surface: 'var(--surface)', paper: 'var(--paper)', box: 'var(--box)', night: 'var(--night)', moon: 'var(--moon)', onrasp: 'var(--on-rasp)', muted: 'var(--muted)' });
+  document.head.appendChild(st);
+}
+const art = (key, s, label, box = '0 0 320 170') => `<svg class="art" viewBox="${box}" role="img" aria-label="${label}">${artInner(key, s)}</svg>`;
+
+/* 익명 결과 집계: 주소와 공개 키를 넣으면 켜진다. 표가 아직 없으면 조용히 건너뛴다. */
+const SB = { url: 'https://zwgqgbbsmobdvxsvtfdj.supabase.co', key: 'sb_publishable_TPy3C1sjZyg69L9YlWvfsQ_3sceHlJD' };
+const CROWD_MIN = 30;
+const SITE = 'https://lab.holidaybooks.co.kr/box/';
+const OTHER = 'https://lab.holidaybooks.co.kr/delivery/';
+const canShare = () => !window.claude && typeof navigator.share === 'function';
+const shareLine = s => `${headline(s)} 이번에는 당신이 배송됩니다.`;
+const sbOn = () => !!(SB.url && SB.key) && !window.claude;
+async function sbCall(fn, body) {
+  const res = await fetch(`${SB.url}/rest/v1/rpc/${fn}`, { method: 'POST', keepalive: true,
+    headers: { apikey: SB.key, Authorization: `Bearer ${SB.key}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) });
+  if (!res.ok) throw new Error('sb ' + res.status);
+  return res.status === 204 ? null : res.json();
+}
+const num = n => Number(n).toLocaleString('ko-KR');
+function crowdLine(s) {
+  const st = s.stats;
+  if (!st || !st.route_total || st.route_total < CROWD_MIN) return '';
+  const x = st.same / st.route_total * 100, share = x > 0 && x < 1 ? '1% 미만이' : `${Math.round(x)}%가`;
+  return `지금까지 ${route(s).into} 된 ${num(st.route_total)}명 중 ${share} 당신처럼 ${FIN_VERB[s.final]}.`;
+}
+function billNo(s) { return s.no ? `No. ${String(s.no).padStart(4, '0')}` : `${clock(arrive(s))} 도착`; }
+function askCrowd() {
+  const s = state;
+  if (!sbOn() || s.asked) return;
+  s.asked = true;
+  let first = false, fresh1 = false, done = [];
+  try {
+    const mine = localStorage.getItem('bx_counted'); first = !mine; if (mine && +mine > 0) s.no = +mine;
+    done = (localStorage.getItem('bx_done') || '').split(',').filter(Boolean); fresh1 = !done.includes(s.route);
+  } catch (err) {}
+  sbCall('bx_submit', { p_route: s.route, p_final: s.final, p_late: lateOf(s), p_picks: s.picks.join(','), p_seen: s.seen, p_count: fresh1, p_first: first }).then(st => {
+    if (!st || state !== s) return;
+    s.stats = st;
+    try {
+      if (fresh1) localStorage.setItem('bx_done', done.concat(s.route).join(','));
+      if (first) { s.no = st.total; localStorage.setItem('bx_counted', String(st.total)); }
+    } catch (err) {}
+    const bn = document.getElementById('billno'); if (bn) bn.textContent = billNo(s);
+    const el = document.getElementById('crowd');
+    if (el) { el.textContent = crowdLine(s); el.hidden = !el.textContent; }
+    prepareCard();
+  }, () => {});
+}
+function askTotal() {
+  if (!sbOn()) return;
+  sbCall('bx_total').then(n => {
+    const el = document.getElementById('crowd0');
+    if (el && n >= CROWD_MIN) { el.textContent = `지금까지 ${num(n)}명이 배송됐습니다.`; el.hidden = false; }
+  }, () => {});
+}
+
+let state = fresh();
+const BEEN = new Set();
+const app = document.getElementById('app');
+
+function bar(s) {
+  return `<div class="bar"><span class="bar-name">문 앞까지</span><span class="bar-side mono">${route(s).name} · 거친 손 ${s.hands.length}</span></div>`;
+}
+function steps(s, cur, all) {
+  const list = route(s).steps;
+  return `<div class="steps" style="grid-template-columns:repeat(${list.length},minmax(0,1fr))" aria-label="지나온 길">${list.map((name, k) =>
+    `<div class="step${all || k < cur ? ' done' : k === cur ? ' now' : ''}"><i></i>${name}</div>`).join('')}</div>`;
+}
+function viewIntro() {
+  return `<section class="intro">
+    <p class="eyebrow">주문된 물건이 되어 보는 실험실 · 2~3분</p>
+    <h1 tabindex="-1">문 앞<em>까지</em></h1>
+    <p class="hook">이번에는 당신이 배송됩니다.</p>
+    <p class="crowd" id="crowd0" hidden></p>
+    <p class="lead">누군가 주문 버튼을 눌렀습니다. 문 앞에 놓일 때까지, 당신은 누구의 손을 거치게 될까요.</p>
+    <p class="pick-h">무엇이 되어 보시겠습니까?</p>
+    <div class="pick">${ORDER.map(id => { const r0 = ROUTES[id]; return `<button data-act="route" data-id="${id}">
+      ${art(r0.icon, null, '', '0 0 120 76')}<b>${r0.name}</b><span>${r0.sub}</span>${BEEN.has(id) ? '<span class="been">다녀옴</span>' : ''}</button>`; }).join('')}</div>
+    <div class="fact"><p><b>택배 기사 한 사람이 하루에 나르는 상자는 평균 200개 안팎입니다.</b> 국내 택배 기사는 약 7만 명, 배달 라이더는 약 50만 명으로 추산됩니다.</p><span class="src">『호모 딜리버리쿠스』 214·150쪽</span></div>
+  </section>`;
+}
+
+function viewScene(s) {
+  const sc = scene(s), r0 = route(s);
+  const head = `<div class="stamp mono"><span>${when(s, s.t0)}</span><span>${sc.where}</span></div>
+    <figure class="fig">${art(sc.art, s, `${sc.where} 그림`)}</figure><h2 tabindex="-1">${sc.title}</h2>`;
+  let main;
+  if (s.phase === 'scene') {
+    const list = options(s, sc);
+    main = `${head}<p>${val(sc.body, s)}</p>${list.length
+      ? `<div class="choices">${list.map(c => `<button class="choice${c.one ? ' one' : ''}" data-act="pick" data-id="${c.id}"><span>${c.label}</span></button>`).join('')}</div>`
+      : `<div class="row"><button class="btn" data-act="next">${sc.go}</button></div>`}`;
+  } else {
+    const c = sc.choices.find(x => x.id === s.pick);
+    main = `${head}<p class="picked">${c.label}</p><p>${val(c.out, s)}</p>
+      <div class="row"><button class="btn" data-act="next">${sc.final ? '결과 보기' : '다음'}</button></div>`;
+  }
+  return `${bar(s)}${steps(s, sc.step)}<section class="card${sc.me ? ' me' : ''}"><div class="card-main">${main}</div></section>`;
+}
+
+function spanHtml(m) { return m >= 60 ? `${Math.floor(m / 60)}<small>시간</small>${m % 60 ? `${m % 60}<small>분</small>` : ''}` : `${m}<small>분</small>`; }
+function viewResult(s) {
+  const r0 = route(s), x = rx(s), ln = lines(s);
+  return `${bar(s)}${steps(s, 0, true)}
+  <section class="bill">
+    <div class="bill-top"><span>HOMO DELIVERICUS</span><span class="mono" id="billno">${billNo(s)}</span></div>
+    <div class="verdict">
+      <h2 tabindex="-1">배송 완료</h2>
+      <figure class="fig">${art(r0.doorArt, s, `문 앞에 놓인 ${r0.name}`)}</figure>
+      <p class="sent">${headline(s)}</p>
+    </div>
+    <p class="crowd" id="crowd"${crowdLine(s) ? '' : ' hidden'}>${crowdLine(s)}</p>
+    <div class="stats">
+      <div class="stat"><span>거친 손</span><b>${s.hands.length}<small>개</small></b></div>
+      <div class="stat"><span>걸린 시간</span><b>${spanHtml(elapsed(s))}</b></div>
+      <div class="stat"><span>받는 사람이 본 사람</span><b>${s.seen}<small>명</small></b></div>
+      <div class="stat"><span>조회 화면에 없는 것</span><b>${s.unseen.length}<small>가지</small></b></div>
+    </div>
+    <div class="trace"><p class="trace-h">배송 조회</p><ol>${r0.track(s).map(([tm, what]) => `<li><span class="mono">${clock(tm)}</span>${what}</li>`).join('')}</ol></div>
+    <div class="trace unseen"><p class="trace-h">조회 화면에 나오지 않는 것</p><ul>${s.unseen.map(u => `<li>${u}</li>`).join('')}</ul></div>
+    <div class="after">${ln.text.map(v => `<p>${v}</p>`).join('')}${ln.src ? `<span class="src">${ln.src}</span>` : ''}</div>
+    <div class="rx">
+      <p class="rx-h">당신에게 배송된 장</p>
+      <p>${x.why}</p>
+      <p class="rx-t">“${x.title}”</p>
+      <span class="src">${x.ch}장 · ${x.page}쪽부터</span>
+    </div>
+    <p class="half"><b>당신이 본 것은 문 바깥쪽입니다.</b> 문 앞까지 달려오는 사람들의 이야기는 4부 ‘부품이 된 인간’에, 그 길이 바꿔 놓은 도시의 이야기는 2부 ‘창고가 된 도시’에 이어집니다.</p>
+    <div class="buy">
+      <p class="buy-h">책에서 이어 읽기</p>
+      <div class="row">
+        <a class="btn ghost" href="https://product.kyobobook.co.kr/detail/S000219549667" target="_blank" rel="noopener" data-store="kyobo">교보문고</a>
+        <a class="btn ghost" href="https://www.yes24.com/product/goods/183795520" target="_blank" rel="noopener" data-store="yes24">예스24</a>
+        <a class="btn ghost" href="https://www.aladin.co.kr/shop/wproduct.aspx?ISBN=9791191381276" target="_blank" rel="noopener" data-store="aladin">알라딘</a>
+      </div>
+    </div>
+    <p class="ask">“당신의 삶은 지금 어디로 배송되고 있는가?”</p>
+    <div class="bc" aria-hidden="true"></div>
+    <div class="bill-foot"><p class="title-line"><b>호모 딜리버리쿠스</b>배송 문명은 어떻게 우리를 바꿨는가<br>김철민 지음 · 홀리데이북스</p><span class="caution">취급주의</span></div>
+  </section>
+  <div class="acts">
+    <div class="row">
+      <button class="btn" data-act="save">결과 이미지 저장</button>
+      <button class="btn ghost" data-act="share">결과 공유하기</button>
+    </div>
+    <button class="link again" data-act="again">다른 물건이 되어 보기</button>
+    <a class="link again" href="${OTHER}" target="_blank" rel="noopener">문 안쪽 실험: 배송 없는 일주일</a>
+  </div>
+  <p class="toast" id="toast"></p>
+  <div class="shot" id="shot" hidden></div>`;
+}
+
+/* 결과 이미지(1080×1350): 화면과 별개로 캔버스에 직접 그려, 어디서 열어도 같은 그림이 나오게 한다. */
+const IMG = { paper: '#F2F1EF', surface: '#FBFAF9', ink: '#231F20', rasp: '#A83D5F', muted: '#5E5A5B', box: '#ACA9AA', line: '#BDB9BA', night: '#2A2526', moon: '#F2F1EF', onrasp: '#FFFFFF' };
+const FONT = (w, px) => `${w} ${px}px "Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic","Noto Sans CJK KR",sans-serif`;
+function wrapLines(gx, text, maxW) {
+  const out = []; let cur = '';
+  for (const w of text.split(' ')) {
+    const tt = cur ? cur + ' ' + w : w;
+    if (!cur || gx.measureText(tt).width <= maxW) cur = tt; else { out.push(cur); cur = w; }
+  }
+  if (cur) out.push(cur);
+  return out;
+}
+function roundRect(gx, x, y, w, h, rad) {
+  gx.beginPath(); gx.moveTo(x + rad, y); gx.arcTo(x + w, y, x + w, y + h, rad); gx.arcTo(x + w, y + h, x, y + h, rad);
+  gx.arcTo(x, y + h, x, y, rad); gx.arcTo(x, y, x + w, y, rad); gx.closePath();
+}
+function artImage(key, s) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 170" width="960" height="510"><style>${artCss('', IMG)}</style><rect width="320" height="170" fill="${IMG.paper}"/>${artInner(key, s)}</svg>`;
+  return new Promise(res => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); });
+}
+async function makeCard(s) {
+  const W = 1080, H = 1350, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const gx = cv.getContext('2d'), r0 = route(s), x = rx(s), sent = headline(s), chap = `“${x.title}”`, last = lines(s).text.slice(-1)[0];
+  try { await Promise.all([900, 700, 500].map(w => document.fonts.load(FONT(w, 40), sent + chap + last + crowdLine(s) + '문앞까지배송완료당신에게된장쪽부터호모딜리버리쿠스김철민지음홀리데이북스취급주의'))); } catch (e) {}
+  const pic = await artImage(r0.doorArt, s);
+  gx.fillStyle = IMG.box; gx.fillRect(0, 0, W, H);
+  roundRect(gx, 54, 54, W - 108, H - 108, 34); gx.fillStyle = IMG.paper; gx.fill(); gx.lineWidth = 12; gx.strokeStyle = IMG.rasp; gx.stroke();
+  const L = 118, R = W - 118, IW = R - L; let y = 152;
+  const dash = yy => { gx.save(); gx.setLineDash([14, 10]); gx.lineWidth = 3; gx.strokeStyle = IMG.line; gx.beginPath(); gx.moveTo(L, yy); gx.lineTo(R, yy); gx.stroke(); gx.restore(); };
+  gx.textBaseline = 'alphabetic'; gx.textAlign = 'left';
+  gx.fillStyle = IMG.ink; gx.font = FONT(900, 30); gx.fillText('HOMO DELIVERICUS', L, y);
+  gx.fillStyle = IMG.rasp; gx.textAlign = 'right'; gx.fillText(billNo(s), R, y); gx.textAlign = 'left';
+  gx.fillRect(L, y + 20, IW, 6);
+  y += 92; gx.fillStyle = IMG.ink; gx.font = FONT(900, 40); gx.fillText('문 앞까지 · 배송 완료', L, y);
+  y += 30;
+  const ph = 384, pw = Math.round(ph * 320 / 170), px = L + Math.round((IW - pw) / 2);
+  if (pic) { gx.save(); roundRect(gx, px, y, pw, ph, 20); gx.clip(); gx.drawImage(pic, px, y, pw, ph); gx.restore(); }
+  roundRect(gx, px, y, pw, ph, 20); gx.lineWidth = 3; gx.strokeStyle = IMG.line; gx.stroke();
+  y += ph + 22;
+  gx.fillStyle = IMG.ink; gx.font = FONT(900, 50);
+  for (const ln of wrapLines(gx, sent, IW)) { y += 66; gx.fillText(ln, L, y); }
+  gx.font = FONT(700, 30); gx.fillStyle = IMG.rasp; y += 14;
+  for (const ln of wrapLines(gx, crowdLine(s) || last, IW)) { y += 44; gx.fillText(ln, L, y); }
+  y += 62; gx.fillStyle = IMG.rasp; gx.font = FONT(900, 26); gx.fillText('당신에게 배송된 장', L, y);
+  gx.fillStyle = IMG.ink; gx.font = FONT(900, 38); y += 6;
+  for (const ln of wrapLines(gx, chap, IW)) { y += 52; gx.fillText(ln, L, y); }
+  y += 40; gx.fillStyle = IMG.muted; gx.font = FONT(500, 24); gx.fillText(`${x.ch}장 · ${x.page}쪽부터`, L, y);
+  dash(1178);
+  gx.fillStyle = IMG.rasp; gx.font = FONT(900, 36); gx.fillText('호모 딜리버리쿠스', L, 1232);
+  gx.fillStyle = IMG.ink; gx.font = FONT(500, 26); gx.fillText('김철민 지음 · 홀리데이북스', L, 1270);
+  gx.fillStyle = IMG.muted; gx.textAlign = 'right'; gx.fillText('문 앞까지', R, 1270); gx.textAlign = 'left';
+  gx.save(); gx.translate(R - 150, 1196); gx.rotate(-0.05); roundRect(gx, 0, 0, 150, 46, 7); gx.lineWidth = 4; gx.strokeStyle = IMG.rasp; gx.stroke();
+  gx.fillStyle = IMG.rasp; gx.font = FONT(900, 24); gx.textAlign = 'center'; gx.fillText('취급주의', 75, 33); gx.restore();
+  cv._bottom = y; cv._pic = !!pic;
+  return cv;
+}
+
+let CARD = null, DL = null;
+try { const u = window.claude && window.claude.use && window.claude.use('downloads'); if (u) u.then(d => { DL = d; }, () => {}); } catch (e) {}
+function prepareCard() {
+  const s = state, job = { blob: null, name: `homo-delivericus-${s.route}.png` };
+  job.ready = makeCard(s).then(cv => new Promise(res => cv.toBlob(res, 'image/png'))).then(b => { job.blob = b; return b; }, () => null);
+  CARD = job;
+}
+function showCard(job) {
+  const holder = document.getElementById('shot');
+  if (!holder || !job.blob) return null;
+  if (!job.url) job.url = URL.createObjectURL(job.blob);
+  holder.innerHTML = ''; const img = new Image(); img.alt = '결과 이미지'; img.src = job.url; holder.appendChild(img); holder.hidden = false;
+  return job.url;
+}
+async function saveCard() {
+  const toast = document.getElementById('toast'), job = CARD, hint = '아래 이미지를 길게 눌러 저장해 주세요.';
+  if (!job) return;
+  if (!job.blob) { toast.textContent = '이미지를 만드는 중입니다.'; await job.ready; }
+  if (!job.blob) { toast.textContent = '이미지를 만들지 못했습니다. 화면을 캡처해 주세요.'; return; }
+  const url = showCard(job);
+  try {
+    if (DL) { await DL.save({ filename: job.name, data: job.blob }); toast.textContent = '이미지를 저장했습니다.'; return; }
+    if (!window.claude) {
+      const file = new File([job.blob], job.name, { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file] }); toast.textContent = ''; return; }
+      const a = document.createElement('a'); a.href = url; a.download = job.name; document.body.appendChild(a); a.click(); a.remove();
+      toast.textContent = '이미지를 저장했습니다.'; return;
+    }
+    toast.textContent = hint;
+  } catch (e) { toast.textContent = hint; }
+}
+
+function render(focus) {
+  const s = state;
+  app.innerHTML = s.phase === 'intro' ? viewIntro() : s.phase === 'result' ? viewResult(s) : viewScene(s);
+  if (s.phase === 'result') { BEEN.add(s.route); prepareCard(); askCrowd(); } else CARD = null;
+  if (s.phase === 'intro') askTotal();
+  if (focus) {
+    window.scrollTo(0, 0);
+    const h = app.querySelector('h1,h2');
+    if (h) h.focus({ preventScroll: true });
+  }
+}
+
+app.addEventListener('click', ev => {
+  const st = ev.target.closest('a[data-store]');
+  if (st && sbOn()) sbCall('bx_click', { p_store: st.dataset.store }).catch(() => {});
+  const b = ev.target.closest('[data-act]');
+  if (!b) return;
+  const s = state, act = b.dataset.act;
+  if (act === 'route') { begin(s, b.dataset.id); render(true);
+  } else if (act === 'pick') {
+    if (s.phase !== 'scene') return;
+    const c = options(s).find(x => x.id === b.dataset.id);
+    if (!c) return;
+    choose(s, c); s.pick = c.id; s.phase = 'outcome'; render(true);
+  } else if (act === 'next') {
+    if (scene(s).final && s.phase === 'outcome') s.phase = 'result';
+    else { s.phase = 'scene'; enter(s, s.i + 1); }
+    render(true);
+  } else if (act === 'again') { state = fresh(); render(true);
+  } else if (act === 'save') { saveCard();
+  } else if (act === 'share') {
+    const toast = document.getElementById('toast'), text = `${shareLine(s)}\n${SITE}`;
+    const manual = () => { toast.textContent = text; };
+    if (canShare()) { try { navigator.share({ title: '문 앞까지', text: shareLine(s), url: SITE }).catch(() => {}); } catch (e) { manual(); } }
+    else { try { navigator.clipboard.writeText(text).then(() => { toast.textContent = '결과 문구와 링크를 복사했습니다. 붙여 넣어 공유해 주세요.'; }, manual); } catch (e) { manual(); } }
+  }
+});
+
+function start(data) {
+  const col = document.getElementById('collect'); if (col && sbOn()) col.hidden = false;
+  if (data && data.state && data.state.phase) state = data.state;
+  render(false);
+}
+try { window.claude?.hot?.snapshot?.(() => ({ state })); } catch (e) {}
+window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+</script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>문 앞까지 현황판</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
+<style>
+/* 레이아웃: 위에 숫자 네 개, 아래로 한 단짜리 막대 목록. 막대는 한 가지 색(크기 비교), 글자는 늘 잉크색. */
+:root{
+  --paper:#F2F1EF; --surface:#FBFAF9; --ink:#231F20; --muted:#5E5A5B; --line:#D5D1D1; --bar:#A83D5F; --track:#E6E3E2;
+  --sans:'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  --mono:'IBM Plex Mono','Noto Sans KR',ui-monospace,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --paper:#1A1718; --surface:#252122; --ink:#EFEDEA; --muted:#ABA6A7; --line:#443E40; --bar:#E0779A; --track:#332E30; color-scheme:dark }
+}
+:root[data-theme="dark"]{ --paper:#1A1718; --surface:#252122; --ink:#EFEDEA; --muted:#ABA6A7; --line:#443E40; --bar:#E0779A; --track:#332E30; color-scheme:dark }
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;word-break:keep-all}
+.wrap{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:24px 56px;display:flex;flex-direction:column;gap:22px}
+h1,h2,p{margin:0}
+h1{font-size:24px;font-weight:900;letter-spacing:-.01em}
+h2{font-size:16px;font-weight:900}
+.head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;padding-bottom:12px;border-bottom:2px solid var(--ink)}
+.sub{font-size:13px;color:var(--muted)}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--bar);outline-offset:2px}
+.btn{min-height:44px;padding:8px 16px;border:2px solid var(--ink);border-radius:10px;background:var(--ink);color:var(--paper);font-weight:700;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.gate{display:flex;flex-direction:column;gap:12px;padding:20px 18px;border:2px solid var(--ink);border-radius:14px;background:var(--surface);max-width:420px}
+.gate input[type=password]{min-height:44px;padding:8px 12px;border:2px solid var(--ink);border-radius:10px;background:var(--paper);flex:1 1 160px;min-width:0}
+.gate label.keep{font-size:14px;display:flex;gap:8px;align-items:center}
+.msg{font-size:14px;font-weight:700;color:var(--bar);min-height:1.6em}
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:620px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.tile{display:flex;flex-direction:column;gap:2px;padding:12px 14px;border-top:3px solid var(--ink);background:var(--surface);border-radius:0 0 10px 10px}
+.tile span{font-size:13px;color:var(--muted)}
+.tile b{font-family:var(--mono);font-size:32px;font-weight:500;line-height:1.15}
+.tile b small{font-family:var(--sans);font-size:14px;font-weight:700;margin-left:2px}
+.tile em{font-style:normal;font-size:13px;color:var(--muted)}
+.panel{display:flex;flex-direction:column;gap:10px}
+.panel > p{font-size:13px;color:var(--muted)}
+.bars{display:flex;flex-direction:column;gap:2px}
+.bar-row{display:grid;grid-template-columns:minmax(96px,9.5em) minmax(0,1fr) auto;align-items:center;gap:10px;padding:5px 6px;border-radius:6px}
+.bar-row:hover{background:var(--surface)}
+.bar-row .lab{font-size:14px;font-weight:700;min-width:0}
+.bar-row .lab small{display:block;font-weight:400;font-size:12px;color:var(--muted)}
+.bar-row .trk{height:14px;background:var(--track);border-radius:0 4px 4px 0;overflow:hidden}
+.bar-row .trk i{display:block;height:100%;background:var(--bar);border-radius:0 4px 4px 0;min-width:0}
+.bar-row .val{font-family:var(--mono);font-size:14px;text-align:right;min-width:4.5em}
+.bar-row .val small{font-family:var(--sans);color:var(--muted);font-size:12px;margin-left:4px}
+#board{display:flex;flex-direction:column;gap:28px}
+.empty{padding:18px;border:2px dashed var(--line);border-radius:12px;color:var(--muted)}
+.foot{font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
+.foot a{color:inherit}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div><h1>문 앞까지 현황판</h1><p class="sub" id="stamp">암호를 넣으면 지금까지 쌓인 결과가 보입니다.</p></div>
+    <div class="row" id="tools" hidden><button class="btn ghost" id="reload">새로 고침</button><button class="btn ghost" id="forget">암호 지우기</button></div>
+  </div>
+
+  <form class="gate" id="gate">
+    <h2><label for="code">현황판 암호</label></h2>
+    <div class="row"><input type="password" id="code" autocomplete="current-password" required><button class="btn" type="submit">보기</button></div>
+    <label class="keep"><input type="checkbox" id="keep"> 이 기기에서 기억하기</label>
+    <p class="msg" id="msg" role="status"></p>
+  </form>
+
+  <div id="board" hidden></div>
+  <p class="foot">참여자는 브라우저 하나를 한 사람으로 셉니다. 같은 물건으로 다시 한 판은 세지 않고, 다른 물건으로 한 판은 따로 셉니다. 암호는 <a href="/delivery/stats.html">배송 없는 일주일 현황판</a>과 같습니다.</p>
+</div>
+
+<script>
+const SB = { url: 'https://zwgqgbbsmobdvxsvtfdj.supabase.co', key: 'sb_publishable_TPy3C1sjZyg69L9YlWvfsQ_3sceHlJD' };
+const STAR = { s5: '별 다섯 개', s4: '별 네 개', s3: '별 세 개', s1: '별 한 개', s0: '평가하지 않음' };
+/* 길마다: 이름, 그리고 고르는 장면들(picks 문자열에서의 자리, 제목, 선택지 이름) */
+const ROUTES = {
+  box: ['택배 상자', [[0, '택배 차 · 김밥', { eat: '다 먹고 출발', go: '두 개만 먹고 출발' }], [1, '지하 주차장', { lift: '엘리베이터를 기다림', stairs: '상자를 안고 계단으로' }], [2, '받는 사람', { open: '문을 열고 “수고하셨습니다”', later: '문자만 확인' }]]],
+  dawn: ['새벽배송 우유', [[0, '공동현관', { call: '주문한 사람에게 전화', guard: '경비실 인터폰', round: '다른 동부터 돌고 다시 옴' }], [1, '받는 사람', { fix: '공동현관 번호를 고침', complain: '고객센터에 글을 남김', none: '가방만 들임' }]]],
+  quick: ['한밤중의 분유', [[0, '요청 사항', { fast: '“최대한 빨리 부탁드려요”', slow: '“천천히 안전하게 오세요”', blank: '적지 않음' }], [1, '편의점 계산대', { rider: '라이더에게 먼저', guest: '손님 계산부터' }], [2, '골목', { navi: '내비가 그린 길', cut: '아는 골목(경로 이탈)' }], [3, '받는 사람 · 별점', { s5: STAR.s5, s4: STAR.s4, s3: STAR.s3, s0: STAR.s0 }]]],
+  food: ['금요일 저녁의 치킨', [[1, '문 앞 · 라이더', { msg: '사과 메시지를 보냄', done: '완료만 누름' }], [2, '받는 사람 · 별점', { s5: STAR.s5, s4: STAR.s4, s1: STAR.s1, s0: STAR.s0 }]]]
+};
+const STORE = { kyobo: '교보문고', yes24: '예스24', aladin: '알라딘' };
+const $ = id => document.getElementById(id);
+const n0 = n => Number(n || 0).toLocaleString('ko-KR');
+const share = (n, t) => t ? Math.round(n / t * 100) : 0;
+const store = { get() { try { return localStorage.getItem('hd_admin_code') || sessionStorage.getItem('hd_admin_code') || ''; } catch (e) { return ''; } },
+  set(v, keep) { try { sessionStorage.setItem('hd_admin_code', v); if (keep) localStorage.setItem('hd_admin_code', v); else localStorage.removeItem('hd_admin_code'); } catch (e) {} },
+  clear() { try { sessionStorage.removeItem('hd_admin_code'); localStorage.removeItem('hd_admin_code'); } catch (e) {} } };
+
+async function fetchStats(code) {
+  const r = await fetch(`${SB.url}/rest/v1/rpc/bx_stats`, { method: 'POST',
+    headers: { apikey: SB.key, Authorization: `Bearer ${SB.key}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ p_code: code }) });
+  if (r.status === 404) throw new Error('집계용 표가 아직 없습니다. SQL을 먼저 실행해 주세요');
+  if (!r.ok) throw new Error('연결 오류 ' + r.status);
+  return r.json();
+}
+
+/* 막대 목록: rows = [{label, sub, n}] · 막대 길이는 목록 안 최댓값 기준, 숫자와 비율은 늘 글자로 함께 적음 */
+function bars(rows, total, unit) {
+  const max = Math.max(1, ...rows.map(r => r.n));
+  return `<div class="bars">${rows.map(r => `<div class="bar-row" title="${r.label}: ${n0(r.n)}${unit} (${share(r.n, total)}%)">
+    <span class="lab">${r.label}${r.sub ? `<small>${r.sub}</small>` : ''}</span>
+    <span class="trk"><i style="width:${r.n / max * 100}%"></i></span>
+    <span class="val num">${n0(r.n)}<small>${share(r.n, total)}%</small></span></div>`).join('')}</div>`;
+}
+function panel(title, note, body) { return `<section class="panel"><h2>${title}</h2>${note ? `<p>${note}</p>` : ''}${body}</section>`; }
+
+function render(d) {
+  const T = d.total, sum = a => a.reduce((x, y) => x + y.n, 0);
+  $('stamp').textContent = d.last ? `마지막 참여 ${new Date(d.last).toLocaleString('ko-KR', { dateStyle: 'medium', timeStyle: 'short' })} · 조회 ${new Date().toLocaleTimeString('ko-KR', { timeStyle: 'short' })}` : '아직 참여 기록이 없습니다.';
+  const clicks = sum(d.clicks), per = id => sum(d.picks.filter(x => x.route === id));
+  const top = Object.keys(ROUTES).map(id => [id, per(id)]).sort((a, b) => b[1] - a[1])[0];
+  const stars = d.picks.filter(x => /(^|,)s[0-9]$/.test(x.picks)), five = sum(stars.filter(x => x.picks.endsWith('s5')));
+  let html = `<div class="tiles">
+    <div class="tile"><span>참여자</span><b>${n0(T)}<small>명</small></b><em>브라우저 기준 · 모두 ${n0(d.plays)}판</em></div>
+    <div class="tile"><span>가장 많이 된 물건</span><b style="font-family:var(--sans);font-size:20px;font-weight:900;line-height:1.9">${T ? ROUTES[top[0]][0] : '없음'}</b><em>${T ? `${n0(top[1])}판 · ${share(top[1], d.plays)}%` : ''}</em></div>
+    <div class="tile"><span>별 다섯 개</span><b>${share(five, sum(stars))}<small>%</small></b><em>별점을 고른 ${n0(sum(stars))}명 중</em></div>
+    <div class="tile"><span>서점 버튼 클릭</span><b>${n0(clicks)}<small>번</small></b><em>참여자 100명당 ${T ? Math.round(clicks / T * 100) : 0}번</em></div>
+  </div>`;
+  if (!T) { $('board').innerHTML = html + '<p class="empty">아직 쌓인 결과가 없습니다. 누군가 한 판을 끝내면 여기에 나타납니다.</p>'; return; }
+
+  html += panel('무엇이 되었나', '처음 화면에서 고른 물건입니다. 한 사람이 여러 물건을 해 보면 물건마다 한 번씩 셉니다.', bars(Object.keys(ROUTES).map(id => ({ label: ROUTES[id][0], n: per(id) })), d.plays, '판'));
+  for (const id of Object.keys(ROUTES)) {
+    const [name, steps] = ROUTES[id], rows = d.picks.filter(x => x.route === id), N = sum(rows);
+    if (!N) continue;
+    html += panel(`${name} · ${n0(N)}명`, '장면이 나오는 순서대로, 그 장면에서 고른 것입니다.', steps.map(([k, title, names]) =>
+      `<p style="font-weight:700;color:var(--ink);margin-top:6px">${title}</p>` + bars(Object.keys(names).map(c => ({ label: names[c], n: sum(rows.filter(x => x.picks.split(',')[k] === c)) })), N, '명')).join(''));
+  }
+  html += panel('날짜별 참여', '한국 시간 기준입니다.', bars(d.dates.map(x => ({ label: x.d.slice(5).replace('-', '월 ') + '일', n: x.n })), T, '명'));
+  html += panel('서점별 클릭', '결과 화면의 서점 버튼이 눌린 횟수입니다. 한 사람이 여러 번 누르면 그만큼 셉니다.',
+    bars(['kyobo', 'yes24', 'aladin'].map(k => ({ label: STORE[k], n: (d.clicks.find(x => x.store === k) || { n: 0 }).n })), clicks, '번'));
+  $('board').innerHTML = html;
+}
+
+async function load(code, fromForm) {
+  $('msg').textContent = '불러오는 중입니다.';
+  try {
+    const d = await fetchStats(code);
+    if (!d) { $('gate').hidden = false; $('board').hidden = true; $('tools').hidden = true; $('msg').textContent = '암호가 맞지 않습니다.'; return; }
+    if (fromForm) store.set(code, $('keep').checked);
+    $('msg').textContent = ''; $('gate').hidden = true; $('board').hidden = false; $('tools').hidden = false;
+    render(d);
+  } catch (e) { $('msg').textContent = '불러오지 못했습니다. (' + e.message + ')'; }
+}
+$('gate').addEventListener('submit', ev => { ev.preventDefault(); const v = $('code').value; if (v) load(v, true); });
+$('reload').addEventListener('click', () => { const c = store.get(); if (c) load(c, false); });
+$('forget').addEventListener('click', () => { store.clear(); $('board').hidden = true; $('tools').hidden = true; $('gate').hidden = false; $('code').value = ''; $('msg').textContent = '이 기기에서 암호를 지웠습니다.'; $('stamp').textContent = '암호를 넣으면 지금까지 쌓인 결과가 보입니다.'; });
+const saved = store.get(); if (saved) load(saved, false);
+</script>
+</body>
+</html>

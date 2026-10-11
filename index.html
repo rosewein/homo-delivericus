@@ -2,23 +2,81 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex">
 <title>홀리데이북스 실험실</title>
-<meta name="description" content="일주일 동안 문 앞에 아무것도 오지 않습니다. 3~4분이면 당신의 배송 의존도가 나옵니다.">
+<meta name="description" content="책에서 꺼낸 3분짜리 실험들. 배송 없는 일주일, 문 앞까지.">
 <meta property="og:type" content="website">
-<meta property="og:title" content="택배도 배달도 없이, 며칠을 버틸 수 있습니까?">
-<meta property="og:description" content="배송 없는 일주일 · 배송 없이 생존하는 현대인의 실험실">
-<meta property="og:image" content="https://lab.holidaybooks.co.kr/delivery/og.png">
+<meta property="og:title" content="홀리데이북스 실험실">
+<meta property="og:description" content="책에서 꺼낸 3분짜리 실험들 · 배송 없는 일주일, 문 앞까지">
+<meta property="og:image" content="https://lab.holidaybooks.co.kr/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:url" content="https://lab.holidaybooks.co.kr/delivery/">
+<meta property="og:url" content="https://lab.holidaybooks.co.kr/">
 <meta name="twitter:card" content="summary_large_image">
-<meta http-equiv="refresh" content="0; url=/delivery/">
-<script>location.replace('/delivery/' + location.search + location.hash);</script>
-<style>body{margin:0;padding:32px 16px;font:16px/1.6 'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:#F2F1EF;color:#231F20}a{color:#A83D5F;font-weight:700}@media (prefers-color-scheme:dark){body{background:#1A1718;color:#EFEDEA}a{color:#E0779A}}</style>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='4' y='16' width='56' height='32' rx='16' fill='%23A83D5F'/%3E%3Ccircle cx='44' cy='32' r='11' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=Noto+Sans+KR:wght@400;700;900&display=swap">
+<style>
+/* 레이아웃: 휴대폰 한 손 폭의 세로 한 단. 책 한 권마다 묶음 하나, 그 안에 실험 카드. */
+:root{
+  --paper:#F2F1EF; --surface:#FBFAF9; --ink:#231F20; --muted:#5E5A5B; --line:#CBC7C7; --rasp:#A83D5F; --box:#ACA9AA; --off:#B9B5B6; --knob:#FFFFFF;
+  --sans:'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic','Noto Sans CJK KR',sans-serif;
+  --mono:'IBM Plex Mono','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',ui-monospace,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --paper:#1A1718; --surface:#252122; --ink:#EFEDEA; --muted:#ABA6A7; --line:#443E40; --rasp:#E0779A; --box:#6F6A6B; --off:#575153; --knob:#EFEDEA; color-scheme:dark }
+}
+:root[data-theme="dark"]{ --paper:#1A1718; --surface:#252122; --ink:#EFEDEA; --muted:#ABA6A7; --line:#443E40; --rasp:#E0779A; --box:#6F6A6B; --off:#575153; --knob:#EFEDEA; color-scheme:dark }
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.65;word-break:keep-all;overflow-wrap:anywhere;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+.wrap{max-width:560px;margin:0 auto;padding-inline:16px;padding-block:36px 56px;display:flex;flex-direction:column;gap:28px}
+h1,h2,p{margin:0}
+h1{font-size:clamp(34px,10vw,46px);font-weight:900;line-height:1.15;letter-spacing:-.02em;text-wrap:balance}
+.eyebrow{font-family:var(--mono);font-size:12.5px;color:var(--muted);letter-spacing:.04em}
+.head{display:flex;flex-direction:column;gap:10px;padding-bottom:22px;border-bottom:2px solid var(--ink)}
+.book{display:flex;flex-direction:column;gap:12px}
+.book h2{font-size:15px;font-weight:700;color:var(--muted)}
+.book h2 b{color:var(--ink);font-weight:900}
+.game{display:grid;grid-template-columns:104px minmax(0,1fr);gap:14px;align-items:center;padding:14px;border:2px solid var(--ink);border-radius:16px;background:var(--surface);color:inherit;text-decoration:none;transition:transform .12s}
+.game:hover{transform:translateY(-2px)}
+.game:active{transform:translateY(1px)}
+.game:focus-visible{outline:3px solid var(--rasp);outline-offset:2px}
+.pic{aspect-ratio:120/76;display:flex;align-items:center;justify-content:center;border-radius:10px;background:var(--paper)}
+.txt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.txt b{font-size:20px;font-weight:900;line-height:1.3}
+.txt span{font-size:15px;line-height:1.5}
+.txt small{font-family:var(--mono);font-size:12.5px;color:var(--muted);margin-top:4px}
+.sw{display:block;width:60px;height:32px;border-radius:999px;background:var(--off);position:relative}
+.sw::after{content:"";position:absolute;left:4px;top:4px;width:24px;height:24px;border-radius:50%;background:var(--knob)}
+.art{display:block;width:100%;height:auto}
+.art .st{fill:none;stroke:var(--ink);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.art .s2{stroke-width:1.5}
+.art .fp{fill:var(--surface)} .art .fb{fill:var(--box)} .art .fr{fill:var(--rasp)}
+.note{font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
+.note a{color:inherit}
+@media (prefers-reduced-motion: reduce){.game{transition:none}}
+</style>
 </head>
 <body>
-<p><a href="/delivery/">배송 없는 일주일</a>로 이동합니다.</p>
+<main class="wrap">
+  <header class="head">
+    <p class="eyebrow">lab.holidaybooks.co.kr</p>
+    <h1>홀리데이북스 실험실</h1>
+    <p>책에서 꺼낸 3분짜리 실험들입니다.</p>
+  </header>
+  <section class="book">
+    <h2><b>『호모 딜리버리쿠스』</b> 김철민 지음</h2>
+    <a class="game" href="/delivery/">
+      <span class="pic"><span class="sw"></span></span>
+      <span class="txt"><b>배송 없는 일주일</b><span>택배도 배달도 없이, 당신은 며칠을 버틸 수 있습니까?</span><small>문 안쪽 · 3~4분</small></span>
+    </a>
+    <a class="game" href="/box/">
+      <span class="pic"><svg class="art" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 76"><path class="st" d="M14 66H106"/><g transform="translate(32 66)"><rect class="st fb" x="0" y="-42" width="56" height="42" rx="3"/><rect class="fr" x="1.1" y="-34" width="53.8" height="5"/><rect class="st s2 fp" x="31" y="-23" width="19" height="13" rx="1.5"/><path class="st s2" d="M34 -18h13m-13 4h8"/></g></svg></span>
+      <span class="txt"><b>문 앞까지</b><span>이번에는 당신이 배송됩니다.</span><small>문 바깥쪽 · 2~3분</small></span>
+    </a>
+  </section>
+  <p class="note">홀리데이북스가 펴낸 책을 바탕으로 만든 실험입니다. 장면은 지어낸 이야기이고, 결과는 이름 없이 숫자로만 모읍니다.</p>
+</main>
 </body>
 </html>
