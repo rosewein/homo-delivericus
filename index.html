@@ -362,24 +362,26 @@ const num = n => Number(n).toLocaleString('ko-KR');
 function crowdLine(s) {
   const st = s.stats, e = s.end;
   if (!st || !st.total) return '';
-  if (st.total < CROWD_MIN) return st.counted ? `당신은 ${num(st.total)}번째 실험 참가자입니다.` : `지금까지 ${num(st.total)}명이 실험했습니다.`;
+  if (st.total < CROWD_MIN) return '';
   const r = st.same / st.total * 100, p = r > 0 && r < 1 ? '1% 미만이' : `${Math.round(r)}%가`;
   const head = `지금까지 ${num(st.total)}명 중 ${p}`;
   if (e.type === 'quit') return `${head} 당신처럼 ‘${SCENES[e.scene].key}’ 앞에서 주문했습니다.`;
   if (e.type === 'forced') return `${head} 당신처럼 ${WHY[e.meter][0]} 주문했습니다.`;
   return `${head} 일주일을 버텼습니다.`;
 }
+function billNo(s) { return s.no ? `No. ${String(s.no).padStart(4, '0')}` : `${survived(s)} / 7`; }
 function askCrowd() {
   const s = state, e = s.end;
   if (!sbOn() || s.asked) return;
   s.asked = true;
   let first = false;
-  try { first = !localStorage.getItem('hd_counted'); } catch (err) {}
+  try { const mine = localStorage.getItem('hd_counted'); first = !mine; if (mine && +mine > 0) s.no = +mine; } catch (err) {}
   sbCall('hd_submit', { p_days: survived(s), p_end: e.type, p_scene: e.scene ?? null, p_meter: e.meter ?? null, p_final: e.final ?? null,
     p_pct: score(s), p_visits: s.visits, p_people: s.people, p_count: first }).then(st => {
     if (!st || state !== s) return;
     s.stats = st;
-    if (first) { try { localStorage.setItem('hd_counted', '1'); } catch (err) {} }
+    if (first) { s.no = st.total; try { localStorage.setItem('hd_counted', String(st.total)); } catch (err) {} }
+    const bn = document.getElementById('billno'); if (bn) bn.textContent = billNo(s);
     const el = document.getElementById('crowd');
     if (el) { el.textContent = crowdLine(s); el.hidden = !el.textContent; }
     prepareCard();
@@ -473,7 +475,7 @@ function viewResult(s) {
   const n = survived(s), pct = score(s), r = rx(s);
   return `${bar(on, true)}${days(n, true)}
   <section class="bill">
-    <div class="bill-top"><span>HOMO DELIVERICUS</span><span class="mono">${n} / 7</span></div>
+    <div class="bill-top"><span>HOMO DELIVERICUS</span><span class="mono" id="billno">${billNo(s)}</span></div>
     <div class="verdict">
       <h2 tabindex="-1">실험 결과 · 당신의 배송 의존도</h2>
       <p class="pct" aria-label="${pct}퍼센트"><b>${pct}</b><span>%</span></p>
@@ -543,7 +545,7 @@ async function makeCard(s) {
   const dash = yy => { g.save(); g.setLineDash([14, 10]); g.lineWidth = 3; g.strokeStyle = IMG.line; g.beginPath(); g.moveTo(L, yy); g.lineTo(R, yy); g.stroke(); g.restore(); };
   g.textBaseline = 'alphabetic'; g.textAlign = 'left';
   g.fillStyle = IMG.ink; g.font = FONT(900, 30); g.fillText('HOMO DELIVERICUS', L, y);
-  g.fillStyle = IMG.rasp; g.textAlign = 'right'; g.fillText(`${n} / 7`, R, y); g.textAlign = 'left';
+  g.fillStyle = IMG.rasp; g.textAlign = 'right'; g.fillText(billNo(s), R, y); g.textAlign = 'left';
   g.fillRect(L, y + 20, IW, 6);
   y += 104; g.fillStyle = IMG.ink; g.font = FONT(900, 44); g.fillText('배송 없는 일주일 · 나의 배송 의존도', L, y);
   y += 262; g.fillStyle = IMG.rasp; g.font = FONT(900, 290); const num = String(pct); g.fillText(num, L - 14, y);
