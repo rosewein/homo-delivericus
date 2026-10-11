@@ -99,8 +99,9 @@ button{font:inherit;color:inherit}
 .stamp{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:13px;color:var(--muted)}
 .card h2{font-size:26px;font-weight:900;line-height:1.25;letter-spacing:-.01em}
 .bonus{font-size:14px;font-weight:700;color:var(--rasp)}
+.sign{font-size:15px;color:var(--muted);font-weight:700}
 .choices{display:flex;flex-direction:column;gap:10px}
-.choice{display:flex;flex-direction:column;align-items:flex-start;gap:6px;width:100%;text-align:left;min-height:56px;padding:12px 14px;border:2px solid var(--ink);border-radius:12px;background:var(--paper);cursor:pointer;font-weight:700;transition:transform .12s}
+.choice{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:6px;width:100%;text-align:left;min-height:56px;padding:12px 14px;border:2px solid var(--ink);border-radius:12px;background:var(--paper);cursor:pointer;font-weight:700;transition:transform .12s}
 .choice:hover{transform:translateY(-1px)}
 .choice:active{transform:translateY(1px)}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
@@ -184,6 +185,13 @@ const MAX = 6;
 const START = { T: 6, E: 6, M: 6 };
 const DAYS = ['월', '화', '수', '목', '금', '토', '일'];
 const METER = { T: '시간', E: '기력', M: '안심' };
+const WHY = { T: ['시간에 쫓겨', '그 시간을'], E: ['몸이 지쳐', '그 무게를'], M: ['불안을 못 이겨', '그 불안을'] };
+const SIGN = {
+  T: ['이번 주는 시간이 빠듯하다.', '남는 시간이 거의 없다.'],
+  E: ['몸이 조금 무겁다.', '몸이 한계에 가깝다.'],
+  M: ['자꾸 현관 쪽을 보게 된다.', '불안해서 손이 자꾸 폰으로 간다.']
+};
+function signs(s) { return ['E', 'T', 'M'].filter(k => s[k] <= 3).map(k => SIGN[k][s[k] <= 1 ? 1 : 0]); }
 
 const SCENES = [
   { d: 0, time: '07:00', title: '빈 현관', key: '빈 현관',
@@ -245,7 +253,7 @@ const SCENES = [
         out: '성에 낀 만두 여섯 개를 찾았다. 굽는 동안 싱크대에 기대 서 있다.' }
     ] },
   { d: 5, time: '10:00', title: '16킬로그램', key: '16킬로그램',
-    bonus: { T: 3, E: 1, note: '주말입니다. 시간 +3, 기력 +1.' },
+    bonus: { T: 3, E: 1, note: '주말이다. 한숨 돌린다.' },
     body: '생수가 떨어졌고 쌀통도 바닥이 보인다. 2리터 생수 여섯 병과 쌀 4킬로그램. 늘 문 앞에 놓여 있던 무게다.',
     tempt: '지금 주문하면 16킬로그램이 문 앞까지 옵니다.',
     choices: [
@@ -310,7 +318,7 @@ function enter(s, i) {
 function headline(s) {
   const e = s.end, day = e.scene != null ? DAYS[SCENES[e.scene].d] : '';
   if (e.type === 'quit')   return `나는 ${day}요일, ${SCENES[e.scene].key} 앞에서 결국 주문했다.`;
-  if (e.type === 'forced') return `나는 ${day}요일, ${METER[e.meter]}이 바닥나 결국 주문했다.`;
+  if (e.type === 'forced') return `나는 ${day}요일, ${WHY[e.meter][0]} 결국 주문했다.`;
   return `나는 배송 없이 일주일을 버텼다. ${FINALS.find(f => f.id === e.final).tail}`;
 }
 function survived(s) { return s.end.type === 'done' ? 7 : SCENES[s.end.scene].d; }
@@ -330,7 +338,7 @@ function rx(s) {
   const e = s.end, at = i => (SCENES[i].title.includes('요일') ? '' : DAYS[SCENES[i].d] + '요일 ') + `‘${SCENES[i].title}’`;
   let ch, why;
   if (e.type === 'quit') { ch = SCENE_CH[e.scene]; why = `${at(e.scene)}에서 포기하고 주문했습니다. 그 순간을 다루는 장입니다.`; }
-  else if (e.type === 'forced') { ch = METER_CH[e.meter]; why = `${METER[e.meter]}이 바닥나 결국 주문했습니다. 그 바닥을 다루는 장입니다.`; }
+  else if (e.type === 'forced') { ch = METER_CH[e.meter]; why = `${WHY[e.meter][0]} 결국 주문했습니다. ${WHY[e.meter][1]} 다루는 장입니다.`; }
   else { const i = s.tight ? s.tight.i : 0; ch = SCENE_CH[i]; why = `일주일 중 가장 아슬아슬했던 순간은 ${at(i)}이었습니다. 그 순간을 다루는 장입니다.`; }
   return { ch, title: CH[ch][0], page: CH[ch][1], why };
 }
@@ -376,9 +384,8 @@ function viewIntro() {
     <div class="hero-sw">${sw(true, true, '배송 ON')}<span class="hero-hint">눌러서 배송을 끊으면 월요일 0시부터 실험이 시작됩니다</span></div>
     <div class="fact"><p><b>2025년 택배 물동량은 60억 개를 넘었습니다.</b> 사흘에 한 번꼴로 택배를 받는 셈입니다.</p><span class="src">『호모 딜리버리쿠스』 15·25쪽</span></div>
     <ul class="rules">
-      <li><b>세 가지</b><span>시간, 기력, 안심으로 일주일을 삽니다. 안심은 필요한 것이 곧 온다는 마음입니다.</span></li>
-      <li><b>값</b><span>직접 움직이면 시간과 기력이 들고, 없이 버티면 안심이 줄어듭니다. 하나라도 바닥나면 손이 먼저 주문 버튼을 누릅니다.</span></li>
-      <li><b>포기</b><span>언제든 포기하고 주문할 수 있습니다. 주문하는 순간 실험은 끝납니다.</span></li>
+      <li><b>선택</b><span>장면마다 직접 움직일지, 없이 버틸지 고릅니다. 무엇이 줄어드는지는 보이지 않습니다.</span></li>
+      <li><b>포기</b><span>언제든 포기하고 주문할 수 있습니다. 버티지 못하면 손이 먼저 주문합니다.</span></li>
     </ul>
   </section>`;
 }
@@ -391,25 +398,24 @@ function viewScene(s) {
   const head = `<div class="stamp mono"><span>${day} ${sc.time}</span><span>문 앞 0개</span></div><h2 tabindex="-1">${sc.title}</h2>`;
   let main, foot = '';
   if (s.phase === 'scene') {
-    main = `${head}${sc.bonus ? `<p class="bonus">${sc.bonus.note}</p>` : ''}<p>${sc.body}</p>
+    const sg = signs(s);
+    main = `${head}${sc.bonus ? `<p class="bonus">${sc.bonus.note}</p>` : ''}<p>${sc.body}</p>${sg.length ? `<p class="sign">${sg.join(' ')}</p>` : ''}
       <div class="choices">${available(s, sc).map(c =>
-        `<button class="choice" data-act="pick" data-n="${sc.choices.indexOf(c)}"><span>${c.label}</span>${chips(s, c)}</button>`).join('')}</div>`;
+        `<button class="choice" data-act="pick" data-n="${sc.choices.indexOf(c)}"><span>${c.label}</span></button>`).join('')}</div>`;
     foot = s.confirm ? CONFIRM
       : `<div class="tempt"><span>${sc.tempt}</span><button class="link" data-act="ask">포기하고 주문한다</button></div>`;
   } else {
     const c = sc.choices[s.pick], out = s.end && s.end.type === 'forced';
-    const delta = ['T', 'E', 'M'].filter(k => c.fx[k]).map(k => `${METER[k]} ${fmt(c.fx[k])}`).join(' · ');
     main = `${head}<p class="picked">${c.label}</p><p>${c.out}</p>
-      ${delta ? `<p class="src">${delta}</p>` : ''}
-      ${out ? `<p><b>${METER[s.end.meter]}이 바닥났습니다.</b> ${s.end.meter === 'M' ? '불안이 먼저 도착했습니다. ' : ''}손이 먼저 주문 버튼을 누릅니다.</p>` : ''}
+      ${out ? `<p><b>${{ T: '이번 주에 쓸 시간이 다 떨어졌습니다.', E: '몸이 더는 따라 주지 않습니다.', M: '불안이 먼저 도착했습니다.' }[s.end.meter]}</b> 손이 먼저 주문 버튼을 누릅니다.</p>` : ''}
       <div class="row"><button class="btn" data-act="next">${out ? '결과 보기' : s.i === SCENES.length - 1 ? '자정으로' : '다음'}</button></div>`;
     if (s.confirm && !out) foot = CONFIRM;
   }
-  return `${bar(false, !!s.end)}${days(sc.d)}${meters(s)}<section class="card"><div class="card-main">${main}</div>${foot}</section>`;
+  return `${bar(false, !!s.end)}${days(sc.d)}<section class="card"><div class="card-main">${main}</div>${foot}</section>`;
 }
 
 function viewFinal(s) {
-  return `${bar(false, true)}${days(7)}${meters(s)}<section class="card"><div class="card-main">
+  return `${bar(false, true)}${days(7)}<section class="card"><div class="card-main">
     <div class="stamp mono"><span>월 00:00</span><span>문 앞 0개</span></div><h2 tabindex="-1">자정</h2>
     <p>일주일이 지났다. 문 앞에는 끝까지 아무것도 오지 않았다. 실험은 끝났고, 이제 다시 주문할 수 있다.</p>
     <div class="choices">${FINALS.map(f => `<button class="choice" data-act="final" data-id="${f.id}"><span>${f.label}</span></button>`).join('')}</div>
@@ -432,7 +438,6 @@ function viewResult(s) {
       <p class="src">호모 딜리버리쿠스(Homo Delivericus)는 ‘배송받는 인간’이라는 뜻으로, 같은 제목의 책이 붙인 이름입니다.</p>
     </div>
     <p class="sent">${headline(s)}</p>
-    <p class="src calc">${calc}</p>
     <div class="stats">
       <div class="stat"><span>버틴 날</span><b>${n}<small>일</small></b></div>
       <div class="stat"><span>직접 간 곳</span><b>${s.visits}<small>곳</small></b></div>
