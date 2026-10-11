@@ -502,8 +502,8 @@ function viewResult(s) {
     <div class="rx">
       <p class="rx-h">당신에게 배송된 장</p>
       <p>${r.why}</p>
-      <p class="rx-t"><span class="mono">${r.ch}장</span>${r.title}</p>
-      <span class="src">${r.page}쪽부터</span>
+      <p class="rx-t">“${r.title}”</p>
+      <span class="src">${r.ch}장 · ${r.page}쪽부터</span>
     </div>
     <p class="half"><b>당신이 본 것은 문 안쪽입니다.</b> 문 밖에서 그 상자를 나르는 사람들은 4부 ‘부품이 된 인간’에, 당신이 정하기 전에 먼저 정하는 AI는 5부 ‘AI가 설계하는 삶’에 있습니다.</p>
     <div class="buy">
@@ -552,7 +552,7 @@ function roundRect(g, x, y, w, h, r) {
 async function makeCard(s) {
   const W = 1080, H = 1350, c = document.createElement('canvas'); c.width = W; c.height = H;
   const g = c.getContext('2d'), pct = score(s), r = rx(s), n = survived(s);
-  const sent = headline(s), chap = `${r.ch}장 ${r.title}`;
+  const sent = headline(s), chap = `“${r.title}”`;
   try { await Promise.all([900, 700, 500].map(w => document.fonts.load(FONT(w, 40), sent + chap + tier(pct) + crowdLine(s) + '당신나의배송의존도호모딜리버리쿠스에게된쪽부터김철민지음홀리데이북스없는일주일취급주의'))); } catch (e) {}
   g.fillStyle = IMG.box; g.fillRect(0, 0, W, H);
   roundRect(g, 54, 54, W - 108, H - 108, 34); g.fillStyle = IMG.paper; g.fill(); g.lineWidth = 12; g.strokeStyle = IMG.rasp; g.stroke();
@@ -577,7 +577,7 @@ async function makeCard(s) {
   y += 66; g.fillStyle = IMG.rasp; g.font = FONT(900, 28); g.fillText('당신에게 배송된 장', L, y);
   g.fillStyle = IMG.ink; g.font = FONT(900, 44); y += 8;
   for (const ln of wrapLines(g, chap, IW)) { y += 60; g.fillText(ln, L, y); }
-  y += 44; g.fillStyle = IMG.muted; g.font = FONT(500, 26); g.fillText(`${r.page}쪽부터`, L, y);
+  y += 44; g.fillStyle = IMG.muted; g.font = FONT(500, 26); g.fillText(`${r.ch}장 · ${r.page}쪽부터`, L, y);
   dash(1178);
   g.fillStyle = IMG.rasp; g.font = FONT(900, 36); g.fillText('호모 딜리버리쿠스', L, 1232);
   g.fillStyle = IMG.ink; g.font = FONT(500, 26); g.fillText('김철민 지음 · 홀리데이북스', L, 1270);
