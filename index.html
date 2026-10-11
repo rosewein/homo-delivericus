@@ -136,6 +136,7 @@ button{font:inherit;color:inherit}
 .gauge{height:12px;border:2px solid var(--ink);border-radius:999px;overflow:hidden;background:var(--paper)}
 .gauge i{display:block;height:100%;background:var(--rasp)}
 .tier{font-size:clamp(22px,6.4vw,28px);font-weight:900;line-height:1.3}
+.crowd{font-size:15px;font-weight:700;color:var(--rasp)}
 .sent{font-size:clamp(19px,5.4vw,23px);font-weight:900;line-height:1.4;padding-top:14px;border-top:2px dashed var(--line)}
 .calc{font-size:12px}
 .stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px}
@@ -179,7 +180,7 @@ button{font:inherit;color:inherit}
 <body>
 <div class="wrap">
   <div id="app" aria-live="polite"></div>
-  <p class="note">김철민의 책 『호모 딜리버리쿠스』(홀리데이북스)를 바탕으로 만든 실험입니다. 장면은 지어낸 이야기이고, 점수는 재미로 보는 값입니다.</p>
+  <p class="note">김철민의 책 『호모 딜리버리쿠스』(홀리데이북스)를 바탕으로 만든 실험입니다. 장면은 지어낸 이야기이고, 점수는 재미로 보는 값입니다.<span id="collect" hidden> 결과는 이름 없이 숫자로만 모읍니다.</span></p>
 </div>
 
 <script>
@@ -347,6 +348,51 @@ function rx(s) {
 }
 /*CORE-END*/
 
+/* 익명 결과 집계: 주소와 공개 키를 넣으면 켜진다. 비어 있으면 꺼져 있다. */
+const SB = { url: '', key: '' };
+const CROWD_MIN = 30;
+const sbOn = () => !!(SB.url && SB.key) && !window.claude;
+async function sbCall(fn, body) {
+  const r = await fetch(`${SB.url}/rest/v1/rpc/${fn}`, { method: 'POST', keepalive: true,
+    headers: { apikey: SB.key, Authorization: `Bearer ${SB.key}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) });
+  if (!r.ok) throw new Error('sb ' + r.status);
+  return r.status === 204 ? null : r.json();
+}
+const num = n => Number(n).toLocaleString('ko-KR');
+function crowdLine(s) {
+  const st = s.stats, e = s.end;
+  if (!st || !st.total) return '';
+  if (st.total < CROWD_MIN) return st.counted ? `당신은 ${num(st.total)}번째 실험 참가자입니다.` : `지금까지 ${num(st.total)}명이 실험했습니다.`;
+  const r = st.same / st.total * 100, p = r > 0 && r < 1 ? '1% 미만이' : `${Math.round(r)}%가`;
+  const head = `지금까지 ${num(st.total)}명 중 ${p}`;
+  if (e.type === 'quit') return `${head} 당신처럼 ‘${SCENES[e.scene].key}’ 앞에서 주문했습니다.`;
+  if (e.type === 'forced') return `${head} 당신처럼 ${WHY[e.meter][0]} 주문했습니다.`;
+  return `${head} 일주일을 버텼습니다.`;
+}
+function askCrowd() {
+  const s = state, e = s.end;
+  if (!sbOn() || s.asked) return;
+  s.asked = true;
+  let first = false;
+  try { first = !localStorage.getItem('hd_counted'); } catch (err) {}
+  sbCall('hd_submit', { p_days: survived(s), p_end: e.type, p_scene: e.scene ?? null, p_meter: e.meter ?? null, p_final: e.final ?? null,
+    p_pct: score(s), p_visits: s.visits, p_people: s.people, p_count: first }).then(st => {
+    if (!st || state !== s) return;
+    s.stats = st;
+    if (first) { try { localStorage.setItem('hd_counted', '1'); } catch (err) {} }
+    const el = document.getElementById('crowd');
+    if (el) { el.textContent = crowdLine(s); el.hidden = !el.textContent; }
+    prepareCard();
+  }, () => {});
+}
+function askTotal() {
+  if (!sbOn()) return;
+  sbCall('hd_total').then(n => {
+    const el = document.getElementById('crowd0');
+    if (el && n >= CROWD_MIN) { el.textContent = `지금까지 ${num(n)}명이 실험했습니다.`; el.hidden = false; }
+  }, () => {});
+}
+
 let state = fresh();
 const app = document.getElementById('app');
 const fmt = n => (n > 0 ? '+' + n : '−' + Math.abs(n));
@@ -383,6 +429,7 @@ function viewIntro() {
     <p class="eyebrow">배송 없이 생존하는 현대인의 실험실 · 3~4분</p>
     <h1 tabindex="-1">배송 <em>없는</em><br>일주일</h1>
     <p class="hook">택배도 배달도 없이, 당신은 며칠을 버틸 수 있습니까?</p>
+    <p class="crowd" id="crowd0" hidden></p>
     <p class="lead">실험 조건은 하나입니다. 일주일 동안 문 앞에 아무것도 오지 않습니다. 택배도, 새벽배송도, 배달 음식도.</p>
     <div class="hero-sw">${sw(true, true, '배송 ON')}<span class="hero-hint">누르면 실험이 시작됩니다</span></div>
     <div class="fact"><p><b>2025년 택배 물동량은 60억 개를 넘었습니다.</b> 사흘에 한 번꼴로 택배를 받는 셈입니다.</p><span class="src">『호모 딜리버리쿠스』 15·25쪽</span></div>
@@ -435,6 +482,7 @@ function viewResult(s) {
       <p class="src">호모 딜리버리쿠스(Homo Delivericus)는 ‘배송받는 인간’이라는 뜻입니다.</p>
     </div>
     <p class="sent">${headline(s)}</p>
+    <p class="crowd" id="crowd"${crowdLine(s) ? '' : ' hidden'}>${crowdLine(s)}</p>
     <div class="stats">
       <div class="stat"><span>버틴 날</span><b>${n}<small>일</small></b></div>
       <div class="stat"><span>직접 간 곳</span><b>${s.visits}<small>곳</small></b></div>
@@ -452,9 +500,9 @@ function viewResult(s) {
     <div class="buy">
       <p class="buy-h">책에서 이어 읽기</p>
       <div class="row">
-        <a class="btn ghost" href="https://product.kyobobook.co.kr/detail/S000219549667" target="_blank" rel="noopener">교보문고</a>
-        <a class="btn ghost" href="https://www.yes24.com/product/goods/183795520" target="_blank" rel="noopener">예스24</a>
-        <a class="btn ghost" href="https://www.aladin.co.kr/shop/wproduct.aspx?ISBN=9791191381276" target="_blank" rel="noopener">알라딘</a>
+        <a class="btn ghost" href="https://product.kyobobook.co.kr/detail/S000219549667" target="_blank" rel="noopener" data-store="kyobo">교보문고</a>
+        <a class="btn ghost" href="https://www.yes24.com/product/goods/183795520" target="_blank" rel="noopener" data-store="yes24">예스24</a>
+        <a class="btn ghost" href="https://www.aladin.co.kr/shop/wproduct.aspx?ISBN=9791191381276" target="_blank" rel="noopener" data-store="aladin">알라딘</a>
       </div>
     </div>
     <div class="door"><div class="door-floor">${on ? '<span class="bx"></span><span class="bx"></span><span class="bx"></span>' : ''}</div>
@@ -488,7 +536,7 @@ async function makeCard(s) {
   const W = 1080, H = 1350, c = document.createElement('canvas'); c.width = W; c.height = H;
   const g = c.getContext('2d'), pct = score(s), r = rx(s), n = survived(s);
   const sent = headline(s), chap = `${r.ch}장 ${r.title}`;
-  try { await Promise.all([900, 700, 500].map(w => document.fonts.load(FONT(w, 40), sent + chap + tier(pct) + '당신나의배송의존도호모딜리버리쿠스에게된쪽부터김철민지음홀리데이북스없는일주일취급주의'))); } catch (e) {}
+  try { await Promise.all([900, 700, 500].map(w => document.fonts.load(FONT(w, 40), sent + chap + tier(pct) + crowdLine(s) + '당신나의배송의존도호모딜리버리쿠스에게된쪽부터김철민지음홀리데이북스없는일주일취급주의'))); } catch (e) {}
   g.fillStyle = IMG.box; g.fillRect(0, 0, W, H);
   roundRect(g, 54, 54, W - 108, H - 108, 34); g.fillStyle = IMG.paper; g.fill(); g.lineWidth = 12; g.strokeStyle = IMG.rasp; g.stroke();
   const L = 118, R = W - 118, IW = R - L; let y = 152;
@@ -507,6 +555,8 @@ async function makeCard(s) {
   y += 44; dash(y);
   g.font = FONT(700, 36); g.fillStyle = IMG.ink; y += 10;
   for (const ln of wrapLines(g, sent, IW)) { y += 52; g.fillText(ln, L, y); }
+  const crowd = crowdLine(s);
+  if (crowd) { g.font = FONT(700, 26); g.fillStyle = IMG.rasp; y += 6; for (const ln of wrapLines(g, crowd, IW)) { y += 38; g.fillText(ln, L, y); } g.fillStyle = IMG.ink; }
   y += 66; g.fillStyle = IMG.rasp; g.font = FONT(900, 28); g.fillText('당신에게 배송된 장', L, y);
   g.fillStyle = IMG.ink; g.font = FONT(900, 44); y += 8;
   for (const ln of wrapLines(g, chap, IW)) { y += 60; g.fillText(ln, L, y); }
@@ -558,7 +608,8 @@ function render(focus) {
   app.innerHTML = s.phase === 'intro' ? viewIntro()
     : s.phase === 'final' ? viewFinal(s)
     : s.phase === 'result' ? viewResult(s) : viewScene(s);
-  if (s.phase === 'result') prepareCard(); else CARD = null;
+  if (s.phase === 'result') { prepareCard(); askCrowd(); } else CARD = null;
+  if (s.phase === 'intro') askTotal();
   if (focus) {
     window.scrollTo(0, 0);
     const h = app.querySelector('h1,h2');
@@ -567,6 +618,8 @@ function render(focus) {
 }
 
 app.addEventListener('click', ev => {
+  const st = ev.target.closest('a[data-store]');
+  if (st && sbOn()) sbCall('hd_click', { p_store: st.dataset.store }).catch(() => {});
   const b = ev.target.closest('[data-act]');
   if (!b) return;
   const s = state, act = b.dataset.act;
@@ -602,6 +655,7 @@ app.addEventListener('click', ev => {
 });
 
 function start(data) {
+  const c = document.getElementById('collect'); if (c && sbOn()) c.hidden = false;
   if (data && data.state && data.state.phase) state = data.state;
   render(false);
 }
