@@ -162,7 +162,11 @@ button{font:inherit;color:inherit}
 .half b{display:block;font-weight:900;margin-bottom:4px}
 .buy{display:flex;flex-direction:column;gap:10px}
 .buy-h{font-weight:900;font-size:17px}
-.buy a.btn{display:inline-flex;align-items:center;justify-content:center;flex:1 1 90px;text-decoration:none}
+a.btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+.buy a.btn{flex:1 1 90px}
+.acts{display:flex;flex-direction:column;gap:10px}
+.acts .row .btn{flex:1 1 90px}
+.acts .again{align-self:center}
 .bill-foot{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;padding-top:12px;border-top:2px dashed var(--line)}
 .title-line{font-size:14px;line-height:1.5}
 .title-line b{display:block;font-size:17px;font-weight:900;color:var(--rasp)}
@@ -351,6 +355,9 @@ function rx(s) {
 /* 익명 결과 집계: 주소와 공개 키를 넣으면 켜진다. 비어 있으면 꺼져 있다. */
 const SB = { url: 'https://zwgqgbbsmobdvxsvtfdj.supabase.co', key: 'sb_publishable_TPy3C1sjZyg69L9YlWvfsQ_3sceHlJD' };
 const CROWD_MIN = 30;
+const SITE = 'https://lab.holidaybooks.co.kr/';
+const canShare = () => !window.claude && typeof navigator.share === 'function';
+const shareLine = s => `나는 배송 의존도 ${score(s)}%, ${tier(score(s))}. 택배도 배달도 없이 며칠을 버틸 수 있습니까?`;
 const sbOn = () => !!(SB.url && SB.key) && !window.claude;
 async function sbCall(fn, body) {
   const r = await fetch(`${SB.url}/rest/v1/rpc/${fn}`, { method: 'POST', keepalive: true,
@@ -513,7 +520,15 @@ function viewResult(s) {
     <div class="bc" aria-hidden="true"></div>
     <div class="bill-foot"><p class="title-line"><b>호모 딜리버리쿠스</b>배송 문명은 어떻게 우리를 바꿨는가<br>김철민 지음 · 홀리데이북스</p><span class="caution">취급주의</span></div>
   </section>
-  <div class="row"><button class="btn" data-act="save">결과 이미지 저장</button><button class="btn ghost" data-act="again">처음부터 다시</button></div>
+  <div class="acts">
+    <button class="btn" data-act="save">결과 이미지 저장</button>
+    <div class="row">
+      ${canShare() ? '<button class="btn ghost" data-act="share">공유하기</button>' : ''}
+      <button class="btn ghost" data-act="copylink">링크 복사</button>
+      <a class="btn ghost" href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(SITE)}" target="_blank" rel="noopener">페이스북</a>
+    </div>
+    <button class="link again" data-act="again">처음부터 다시</button>
+  </div>
   <p class="toast" id="toast"></p>
   <div class="shot" id="shot" hidden></div>`;
 }
@@ -653,6 +668,11 @@ app.addEventListener('click', ev => {
   } else if (act === 'final') { s.end = { type: 'done', final: b.dataset.id }; s.phase = 'result'; render(true);
   } else if (act === 'again') { state = fresh(); render(true);
   } else if (act === 'save') { saveCard();
+  } else if (act === 'share') {
+    try { navigator.share({ title: '배송 없는 일주일', text: shareLine(s), url: SITE }).catch(() => {}); } catch (e) {}
+  } else if (act === 'copylink') {
+    const toast = document.getElementById('toast'), manual = () => { toast.textContent = SITE; };
+    try { navigator.clipboard.writeText(SITE).then(() => { toast.textContent = '링크를 복사했습니다.'; }, manual); } catch (e) { manual(); }
   }
 });
 
