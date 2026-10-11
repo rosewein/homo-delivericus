@@ -117,12 +117,14 @@ a.link{display:inline-flex;align-items:center}
 .trace{display:flex;flex-direction:column;gap:8px;padding-top:14px;border-top:2px dashed var(--line)}
 .trace-h{font-weight:900;font-size:14px}
 .trace ol,.trace ul{list-style:none;padding:0;display:flex;flex-direction:column;gap:4px;font-size:15px}
-.trace ol li{display:grid;grid-template-columns:3.4em minmax(0,1fr);gap:10px}
+.trace ol{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:4px 12px}
+.trace ol li{display:contents}
 .trace ol li span{color:var(--muted)}
 .trace.unseen .trace-h{color:var(--rasp)}
 .trace ul li{display:grid;grid-template-columns:1em minmax(0,1fr);gap:6px;font-weight:700}
 .trace ul li::before{content:"·";color:var(--rasp);font-weight:900}
 .after{display:flex;flex-direction:column;gap:6px;font-size:17px;font-weight:700;padding-top:14px;border-top:2px dashed var(--line)}
+.after .src{font-weight:500;white-space:nowrap}
 .ask{font-family:var(--serif);font-weight:700;font-size:clamp(23px,6.8vw,29px);line-height:1.4;text-wrap:balance}
 .rx{display:flex;flex-direction:column;gap:8px;padding:16px;border:2px solid var(--ink);border-radius:12px;background:var(--paper)}
 .rx-h{font-weight:900;font-size:14px;color:var(--rasp);letter-spacing:.02em}
@@ -210,9 +212,9 @@ const ROUTES = {
       { step: 0, at: hm(0, 22, 58), where: '물류센터', title: '마감 2분 전', art: 'shelf', hands: ['집는 손'], go: '옮겨진다',
         body: '밤 11시 마감을 2분 남기고 주문이 들어왔다. 축구장 수십 개만 한 물류센터, 수십만 가지 물건 사이에서 손 하나가 당신을 집는다. 계란, 빵과 함께 보냉가방에 담긴다.' },
       { step: 1, at: hm(1, 1, 30), where: '캠프', title: '캠프', art: 'camp', hands: ['나누는 손'], go: '실린다',
-        body: '한밤에 도심 가까운 ‘캠프’에 내려진다. 동네별로 한 번 더 나뉜다. 당신이 탈 차가 정해진다. 기사의 단말기에 오늘 돌 집들이 순서대로 뜬다. 모두 아침 7시 전이다.' },
+        body: '한밤에 도심 가까운 ‘캠프’에 내려진다. 동네별로 한 번 더 나뉜다. 당신이 탈 차가 정해진다. 기사의 단말기에 오늘 돌 집이 순서대로 뜬다. 모두 아침 7시 전이다.' },
       { step: 2, at: hm(1, 4, 38), where: '공동현관', title: '공동현관', art: 'lobby', hands: ['배송 기사'],
-        body: '새벽 4시 반. 오는 길은 비어 있었다. 이 건물에서 깨어 있는 사람은 기사 한 명뿐이다. 주문서에 적힌 공동현관 비밀번호를 누른다. 문이 열리지 않는다. 번호가 바뀐 모양이다.',
+        body: '새벽 4시 38분. 오는 길은 비어 있었다. 이 건물에서 깨어 있는 사람은 기사 한 명뿐이다. 주문서에 적힌 공동현관 비밀번호를 누른다. 문이 열리지 않는다. 번호가 바뀐 모양이다.',
         choices: [
           { id: 'call', label: '기사는 주문한 사람에게 전화를 건다', late: 2, set: { woke: 1 }, unseen: '새벽 4시 38분에 걸어야 했던 전화',
             out: '신호가 여섯 번 간다. 잠긴 목소리가 번호 네 자리를 부른다. 전화는 바로 끊긴다. 문이 열린다.' },
@@ -224,7 +226,7 @@ const ROUTES = {
       { step: 3, at: hm(1, 4, 44), drift: true, arrive: true, where: '9층 복도', title: '문 앞', art: 'doorbag', go: '문 안쪽으로',
         body: '보냉가방이 문 앞에 놓인다. 찰칵. 복도 센서등이 꺼진다. 아침까지는 이 가방이 당신의 냉장고다.' },
       { step: 3, at: hm(1, 6, 27), me: true, final: true, where: '문 안쪽', title: '알림', art: 'msg',
-        body: s => `이제 당신은 그 우유를 주문한 사람이다. 알림이 울린다. “새벽배송이 도착했습니다.” ${s.flags.woke ? '새벽에 전화를 받고 한 번 깼던 일이 떠오른다.' : '밖은 아직 어둡다.'}`,
+        body: s => `이제 당신은 그 우유를 주문한 사람이다. 아침 6시 27분, 눈을 뜬다. 휴대폰에 알림이 와 있다. “새벽배송이 도착했습니다.” ${s.flags.woke ? '새벽에 전화를 받고 한 번 깼던 일이 떠오른다.' : '밖은 아직 어둡다.'}`,
         choices: [
           { id: 'fix', label: '공동현관 번호가 바뀐 것이 생각나, 주문서의 번호를 고친다',
             out: '주문 정보를 열어 네 자리를 고친다. 20초쯤 걸렸다.' },
@@ -344,7 +346,7 @@ function lines(s) {
     fix: '받는 사람은 공동현관 번호를 고쳐 두었다. 다음 새벽에는 그 문이 한 번에 열린다.',
     complain: '받는 사람은 고객센터에 한 줄을 남겼다. 바뀐 번호를 알리지 않은 쪽은 받는 사람이었다.',
     none: '받는 사람은 가방을 들였다. 누가 다녀갔는지는 끝내 모른다.' }[f]] };
-  const src = n >= 3 ? '『호모 딜리버리쿠스』 166쪽' : '';
+  const src = n >= 3 ? '『호모 딜리버리쿠스』 166쪽' : n === 1 ? '『호모 딜리버리쿠스』 167쪽' : '';
   if (s.route === 'quick') return { text: [
     (s.late ? `분유는 앱이 알려 준 시간보다 ${s.late}분 늦게 도착했다.` : '분유는 앱이 알려 준 시간에 도착했다.') + (s.flags.off ? ' 시간을 맞추려고 벗어난 길은 ‘경로 이탈’로 남았다.' : ''),
     STAR_LINE[n]], src };
@@ -368,7 +370,7 @@ function rx(s) {
     if (n === 4 || n === 3) [ch, why] = [20, STAR_WHY[n]];
     else if (s.flags.riderFirst) [ch, why] = [7, '손님보다 배달 기사를 먼저 맞는 편의점이 나오는 장입니다.'];
     else [ch, why] = [18, '20년 다닌 지름길을 두고 내비를 따르는 이유가 나오는 장입니다.'];
-  } else [ch, why] = n ? [20, STAR_WHY[n]] : [18, '버튼이 ‘수락’ 하나뿐인 화면이 나오는 장입니다.'];
+  } else [ch, why] = n ? [20, STAR_WHY[n]] : [18, '할 일이 ‘수락’을 누르는 것뿐인 화면이 나오는 장입니다.'];
   return { ch, title: CH[ch][0], page: CH[ch][1], why };
 }
 const FIN_VERB = {
@@ -582,7 +584,7 @@ function viewIntro() {
     <p class="pick-h">무엇이 되어 보시겠습니까?</p>
     <div class="pick">${ORDER.map(id => { const r0 = ROUTES[id]; return `<button data-act="route" data-id="${id}">
       ${art(r0.icon, null, '', '0 0 120 76')}<b>${r0.name}</b><span>${r0.sub}</span>${BEEN.has(id) ? '<span class="been">다녀옴</span>' : ''}</button>`; }).join('')}</div>
-    <div class="fact"><p><b>택배 기사 한 사람이 하루에 나르는 상자는 평균 200개 안팎입니다.</b> 국내 택배 기사는 약 7만 명, 배달 라이더는 약 50만 명으로 추산됩니다.</p><span class="src">『호모 딜리버리쿠스』 214·150쪽</span></div>
+    <div class="fact"><p><b>택배 기사 한 사람이 하루에 맡는 배송은 평균 200개 안팎입니다.</b> 국내 택배 기사는 약 7만 명이고, 배달 라이더는 약 50만 명으로 추산됩니다.</p><span class="src">『호모 딜리버리쿠스』 214·150쪽</span></div>
   </section>`;
 }
 
@@ -622,9 +624,9 @@ function viewResult(s) {
       <div class="stat"><span>받는 사람이 본 사람</span><b>${s.seen}<small>명</small></b></div>
       <div class="stat"><span>조회 화면에 없는 것</span><b>${s.unseen.length}<small>가지</small></b></div>
     </div>
-    <div class="trace"><p class="trace-h">배송 조회</p><ol>${r0.track(s).map(([tm, what]) => `<li><span class="mono">${clock(tm)}</span>${what}</li>`).join('')}</ol></div>
+    <div class="trace"><p class="trace-h">배송 조회</p><ol>${r0.track(s).map(([tm, what]) => `<li><span class="mono">${when(s, tm)}</span>${what}</li>`).join('')}</ol></div>
     <div class="trace unseen"><p class="trace-h">조회 화면에 나오지 않는 것</p><ul>${s.unseen.map(u => `<li>${u}</li>`).join('')}</ul></div>
-    <div class="after">${ln.text.map(v => `<p>${v}</p>`).join('')}${ln.src ? `<span class="src">${ln.src}</span>` : ''}</div>
+    <div class="after">${ln.text.map((v, k) => `<p>${v}${ln.src && k === ln.text.length - 1 ? ` <span class="src">${ln.src}</span>` : ''}</p>`).join('')}</div>
     <div class="rx">
       <p class="rx-h">당신에게 배송된 장</p>
       <p>${x.why}</p>
