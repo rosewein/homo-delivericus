@@ -340,8 +340,8 @@ const METER_CH = { M: 13, T: 5, E: 28 };
 function rx(s) {
   const e = s.end, at = i => (SCENES[i].title.includes('요일') ? '' : DAYS[SCENES[i].d] + '요일 ') + `‘${SCENES[i].title}’`;
   let ch, why;
-  if (e.type === 'quit') { ch = SCENE_CH[e.scene]; why = `${at(e.scene)}에서 포기하고 주문했습니다. 그 순간을 다루는 장입니다.`; }
-  else if (e.type === 'forced') { ch = METER_CH[e.meter]; why = `${WHY[e.meter][0]} 결국 주문했습니다. ${WHY[e.meter][1]} 다루는 장입니다.`; }
+  if (e.type === 'quit') { ch = SCENE_CH[e.scene]; why = '당신이 포기한 그 순간을 다루는 장입니다.'; }
+  else if (e.type === 'forced') { ch = METER_CH[e.meter]; why = `${WHY[e.meter][1]} 다루는 장입니다.`; }
   else { const i = s.tight ? s.tight.i : 0; ch = SCENE_CH[i]; why = `일주일 중 가장 아슬아슬했던 순간은 ${at(i)}이었습니다. 그 순간을 다루는 장입니다.`; }
   return { ch, title: CH[ch][0], page: CH[ch][1], why };
 }
@@ -383,8 +383,8 @@ function viewIntro() {
     <p class="eyebrow">배송 없이 생존하는 현대인의 실험실 · 3~4분</p>
     <h1 tabindex="-1">배송 <em>없는</em><br>일주일</h1>
     <p class="hook">택배도 배달도 없이, 당신은 며칠을 버틸 수 있습니까?</p>
-    <p class="lead">실험 조건은 하나입니다. 일주일 동안 문 앞에 아무것도 오지 않습니다. 택배, 새벽배송, 배달 음식, 20분 장보기가 모두 멈춥니다. 필요한 것은 직접 가서 구하거나 없이 지냅니다.</p>
-    <div class="hero-sw">${sw(true, true, '배송 ON')}<span class="hero-hint">눌러서 배송을 끊으면 월요일 0시부터 실험이 시작됩니다</span></div>
+    <p class="lead">실험 조건은 하나입니다. 일주일 동안 문 앞에 아무것도 오지 않습니다. 택배도, 새벽배송도, 배달 음식도.</p>
+    <div class="hero-sw">${sw(true, true, '배송 ON')}<span class="hero-hint">누르면 실험이 시작됩니다</span></div>
     <div class="fact"><p><b>2025년 택배 물동량은 60억 개를 넘었습니다.</b> 사흘에 한 번꼴로 택배를 받는 셈입니다.</p><span class="src">『호모 딜리버리쿠스』 15·25쪽</span></div>
   </section>`;
 }
@@ -416,19 +416,17 @@ function viewScene(s) {
 function viewFinal(s) {
   return `${bar(false, true)}${days(7)}<section class="card"><div class="card-main">
     <div class="stamp mono"><span>월 00:00</span><span>문 앞 0개</span></div><h2 tabindex="-1">자정</h2>
-    <p>일주일이 지났다. 문 앞에는 끝까지 아무것도 오지 않았다. 실험은 끝났고, 이제 다시 주문할 수 있다.</p>
+    <p>일주일이 지났다. 문 앞에는 끝까지 아무것도 오지 않았다. 실험은 끝났다.</p>
     <div class="choices">${FINALS.map(f => `<button class="choice" data-act="final" data-id="${f.id}"><span>${f.label}</span></button>`).join('')}</div>
   </div></section>`;
 }
 
 function viewResult(s) {
   const on = !(s.end.type === 'done' && s.end.final === 'off');
-  const n = survived(s), pct = score(s), fc = finalCut(s), r = rx(s);
-  const calc = `100 − 버틴 날 ${n}일×5 − 직접 간 곳 ${s.visits}곳×5${fc ? ` − ${s.end.final === 'off' ? '하루 더 버팀' : '필요한 것만 주문'} ${fc}` : ''} = ${pct}`;
+  const n = survived(s), pct = score(s), r = rx(s);
   return `${bar(on, true)}${days(n, true)}
   <section class="bill">
     <div class="bill-top"><span>HOMO DELIVERICUS</span><span class="mono">${n} / 7</span></div>
-    <dl class="to"><dt>보낸 곳</dt><dd>배송 없는 일주일</dd><dt>받는 분</dt><dd>당신</dd><dt>품명</dt><dd class="hl">배송 의존도 ${pct}%</dd></dl>
     <div class="verdict">
       <h2 tabindex="-1">실험 결과 · 당신의 배송 의존도</h2>
       <p class="pct" aria-label="${pct}퍼센트"><b>${pct}</b><span>%</span></p>
@@ -448,7 +446,7 @@ function viewResult(s) {
       <p class="rx-h">당신에게 배송된 장</p>
       <p>${r.why}</p>
       <p class="rx-t"><span class="mono">${r.ch}장</span>${r.title}</p>
-      <span class="src">『호모 딜리버리쿠스』 ${r.page}쪽부터</span>
+      <span class="src">${r.page}쪽부터</span>
     </div>
     <p class="half"><b>당신이 본 것은 문 안쪽입니다.</b> 문 밖에서 그 상자를 나르는 사람들은 4부 ‘부품이 된 인간’에, 당신이 정하기 전에 먼저 정하는 AI는 5부 ‘AI가 설계하는 삶’에 있습니다.</p>
     <div class="buy">
@@ -461,7 +459,7 @@ function viewResult(s) {
     </div>
     <div class="door"><div class="door-floor">${on ? '<span class="bx"></span><span class="bx"></span><span class="bx"></span>' : ''}</div>
       <span class="door-cap">${on ? '주문하자 문 앞이 다시 차기 시작합니다.' : '문 앞은 오늘도 비어 있습니다.'}</span></div>
-    <p class="ask">“당신은 움직이는가, 움직여지는가?”</p><span class="src">『호모 딜리버리쿠스』 19쪽</span>
+    <p class="ask">“당신은 움직이는가, 움직여지는가?”</p>
     <div class="bc" aria-hidden="true"></div>
     <div class="bill-foot"><p class="title-line"><b>호모 딜리버리쿠스</b>배송 문명은 어떻게 우리를 바꿨는가<br>김철민 지음 · 홀리데이북스</p><span class="caution">취급주의</span></div>
   </section>
@@ -512,7 +510,7 @@ async function makeCard(s) {
   y += 66; g.fillStyle = IMG.rasp; g.font = FONT(900, 28); g.fillText('당신에게 배송된 장', L, y);
   g.fillStyle = IMG.ink; g.font = FONT(900, 44); y += 8;
   for (const ln of wrapLines(g, chap, IW)) { y += 60; g.fillText(ln, L, y); }
-  y += 44; g.fillStyle = IMG.muted; g.font = FONT(500, 26); g.fillText(`『호모 딜리버리쿠스』 ${r.page}쪽부터`, L, y);
+  y += 44; g.fillStyle = IMG.muted; g.font = FONT(500, 26); g.fillText(`${r.page}쪽부터`, L, y);
   dash(1178);
   g.fillStyle = IMG.rasp; g.font = FONT(900, 36); g.fillText('호모 딜리버리쿠스', L, 1232);
   g.fillStyle = IMG.ink; g.font = FONT(500, 26); g.fillText('김철민 지음 · 홀리데이북스', L, 1270);
