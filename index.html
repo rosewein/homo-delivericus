@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta name="description" content="배송 스위치를 끄고 일주일을 버텨 보세요. 3~4분이면 당신이 몇 퍼센트 ‘호모 딜리버리쿠스’(배송받는 인간)인지 나옵니다.">
+<meta name="description" content="일주일 동안 문 앞에 아무것도 오지 않습니다. 3~4분이면 당신의 배송 의존도가 나옵니다.">
 <meta property="og:type" content="website">
-<meta property="og:title" content="당신은 몇 퍼센트 ‘호모 딜리버리쿠스’입니까?">
-<meta property="og:description" content="배송 없는 일주일 · 스위치를 끄고 7일을 버티는 3~4분 실험">
+<meta property="og:title" content="택배도 배달도 없이, 며칠을 버틸 수 있습니까?">
+<meta property="og:description" content="배송 없는 일주일 · 배송 없이 생존하는 현대인의 실험실">
 <meta property="og:image" content="https://rosewein.github.io/homo-delivericus/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -175,7 +175,7 @@ button{font:inherit;color:inherit}
 <body>
 <div class="wrap">
   <div id="app" aria-live="polite"></div>
-  <p class="note">장면과 선택지는 책의 질문을 바탕으로 새로 쓴 가상 상황이고, 시간·기력·안심 수치와 퍼센트는 놀이용입니다. 장 제목과 쪽수는 김철민, 『호모 딜리버리쿠스』(홀리데이북스, 2026)에서 옮겼습니다. 시제품입니다.</p>
+  <p class="note">김철민의 책 『호모 딜리버리쿠스』(홀리데이북스)를 바탕으로 만든 실험입니다. 장면은 지어낸 이야기이고, 점수는 재미로 보는 값입니다.</p>
 </div>
 
 <script>
@@ -188,7 +188,7 @@ const METER = { T: '시간', E: '기력', M: '안심' };
 const SCENES = [
   { d: 0, time: '07:00', title: '빈 현관', key: '빈 현관',
     body: '문을 연다. 늘 놓여 있던 새벽배송 가방이 없다. 냉장고에는 달걀 두 알과 김치가 전부다.',
-    tempt: '지금 켜면 내일 아침, 문 앞에 가방이 놓입니다.',
+    tempt: '지금 주문하면 내일 아침, 문 앞에 가방이 놓입니다.',
     choices: [
       { label: '출근길에 편의점에 들러 아침을 산다', fx: { T: -1 }, visit: 1, people: 1,
         out: '계산대에서 “봉투 필요하세요?”라는 말을 듣는다. 사람 손에서 물건을 건네받은 게 오랜만이다.' },
@@ -197,7 +197,7 @@ const SCENES = [
     ] },
   { d: 0, time: '19:30', title: '퇴근길', key: '장보기',
     body: '일주일 치 먹을 것이 필요하다. 평소라면 지하철에서 주문하고 내일 아침 문 앞에서 받았다.',
-    tempt: '지금 켜면 지하철 안에서 장보기가 끝납니다.',
+    tempt: '지금 주문하면 지하철 안에서 장보기가 끝납니다.',
     choices: [
       { label: '마트에 들러 일주일 치 장을 본다', fx: { T: -2, E: -2, M: 1 }, visit: 1, people: 2, stock: true,
         out: '양손에 봉투를 들고 걷는다. 손가락에 비닐 자국이 남는다. 냉장고가 찼다.' },
@@ -208,7 +208,7 @@ const SCENES = [
     ] },
   { d: 1, time: '08:10', title: '마지막 한 롤', key: '휴지',
     body: '화장실 휴지가 한 롤 남았다. 서른 롤짜리 묶음은 늘 문 앞까지 왔다.',
-    tempt: '지금 켜면 서른 롤이 내일 도착합니다.',
+    tempt: '지금 주문하면 서른 롤이 내일 도착합니다.',
     choices: [
       { label: '점심시간에 사서 사무실로 들고 온다', fx: { T: -1, E: -1 }, visit: 1, people: 1,
         out: '열두 롤 묶음을 안고 엘리베이터에 탄다. 타는 사람마다 한 번씩 쳐다본다. 퇴근길 지하철에서도 안고 간다.' },
@@ -216,8 +216,8 @@ const SCENES = [
         out: '칸 수를 세기 시작한다. 휴지 생각을 이렇게 오래 해 본 적이 없다.' }
     ] },
   { d: 2, time: '22:40', title: '나른한 밤', key: '야식',
-    body: '배가 고픈 건 아니다. 그런데 손이 폰을 집는다. 배달 앱이 있던 자리를 누르자 ‘꺼짐’이라고 뜬다.',
-    tempt: '지금 켜면 20분 뒤 초인종이 울립니다.',
+    body: '배가 고픈 건 아니다. 그런데 손이 폰을 집는다. 배달 앱을 열자 ‘실험 중’이라고 뜬다.',
+    tempt: '지금 주문하면 20분 뒤 초인종이 울립니다.',
     choices: [
       { label: '슬리퍼를 신고 편의점까지 걸어간다', fx: { T: -1, E: -1, M: 1 }, visit: 1, people: 1,
         out: '밤공기가 생각보다 차다. 컵라면 하나를 골라 돌아오는 데 12분이 걸렸다. 그사이 나른함은 사라졌다.' },
@@ -228,7 +228,7 @@ const SCENES = [
     ] },
   { d: 3, time: '12:20', title: '내일까지', key: '선물',
     body: '내일 저녁은 친구 집들이다. 선물을 아직 못 샀다. 어제 주문했다면 오늘 도착했을 것이다.',
-    tempt: '지금 켜면 내일 오전에 선물이 도착합니다.',
+    tempt: '지금 주문하면 내일 오전에 선물이 도착합니다.',
     choices: [
       { label: '퇴근 후 가게를 찾아가 고른다', fx: { T: -2, E: -1, M: 1 }, visit: 1, people: 2, flag: 'shop',
         out: '기억하던 자리에 그 가게가 없다. 두 블록을 더 걸어 다른 가게를 찾는다. 점원이 포장지 두 가지를 꺼내 보여 준다.' },
@@ -237,7 +237,7 @@ const SCENES = [
     ] },
   { d: 4, time: '19:00', title: '금요일 저녁', key: '금요일 저녁',
     body: '한 주가 끝났다. 소파가 부른다. 금요일 저녁은 늘 배달이었다.',
-    tempt: '지금 켜면 소파에서 일어나지 않아도 됩니다.',
+    tempt: '지금 주문하면 소파에서 일어나지 않아도 됩니다.',
     choices: [
       { label: '동네 카페에 가서 저녁을 먹는다', fx: { T: -1, E: -1, M: 2 }, visit: 1, people: 2, flag: 'cafe',
         out: '창가 자리는 픽업을 기다리는 봉투들 차지다. 안쪽 자리에 앉아 샌드위치를 먹는다. 옆 테이블 대화가 들린다.' },
@@ -247,7 +247,7 @@ const SCENES = [
   { d: 5, time: '10:00', title: '16킬로그램', key: '16킬로그램',
     bonus: { T: 3, E: 1, note: '주말입니다. 시간 +3, 기력 +1.' },
     body: '생수가 떨어졌고 쌀통도 바닥이 보인다. 2리터 생수 여섯 병과 쌀 4킬로그램. 늘 문 앞에 놓여 있던 무게다.',
-    tempt: '지금 켜면 16킬로그램이 문 앞까지 옵니다.',
+    tempt: '지금 주문하면 16킬로그램이 문 앞까지 옵니다.',
     choices: [
       { label: '마트에서 사서 들고 온다', fx: { T: -2, E: -3, M: 1 }, visit: 1, people: 1, flag: 'carry',
         out: '16킬로그램을 들고 오다 세 번 쉰다. 문 앞에 놓여 있을 때는 몰랐던 무게를 팔이 먼저 안다.' },
@@ -256,7 +256,7 @@ const SCENES = [
     ] },
   { d: 5, time: '16:00', title: '비어 있는 오후', key: '빈 오후',
     body: '기다릴 택배가 없다. 도착 예정 알림도 오지 않는다. 오후가 통째로 남았다.',
-    tempt: '지금 켜면 기다릴 것이 생깁니다.',
+    tempt: '지금 주문하면 기다릴 것이 생깁니다.',
     choices: [
       { label: '살 것 없이 동네를 한 바퀴 걷는다', fx: { T: -1, E: -1, M: 2 }, visit: 1, people: 1, flag: 'pm',
         out: '처음 보는 골목에 세탁소가 있다. 주인과 눈이 마주쳐 꾸벅 인사한다. 목적 없이 걸은 건 오랜만이다.' },
@@ -265,19 +265,19 @@ const SCENES = [
     ] },
   { d: 6, time: '21:00', title: '일주일 치 목록', key: '일주일 치 목록',
     body: '일주일 동안 사고 싶은 것을 메모장에 적어 두었다. 다시 읽어 본다. 며칠 전의 급함이 낯설다.',
-    tempt: '지금 켜면 목록이 그대로 장바구니가 됩니다.',
+    tempt: '지금 포기하면 목록이 그대로 장바구니가 됩니다.',
     choices: [
       { label: '지금도 필요한 것만 남긴다', fx: { M: 1 },
         out: '절반 넘게 지웠다. 지운 것들은 물건보다 그날의 기분에 가까웠다.' },
       { label: '목록을 그대로 둔다', fx: {},
-        out: '하나도 지우지 않는다. 내일 스위치를 올리면 한꺼번에 담을 수 있다.' }
+        out: '하나도 지우지 않는다. 내일 실험이 끝나면 한꺼번에 주문할 수 있다.' }
     ] }
 ];
 
 const FINALS = [
-  { id: 'all',  label: '전부 다시 켠다',   tail: '그리고 전부 다시 켰다.' },
-  { id: 'some', label: '필요한 것만 켠다', tail: '그리고 필요한 것만 다시 켰다.' },
-  { id: 'off',  label: '하루 더 꺼 둔다',  tail: '그리고 하루 더 꺼 두기로 했다.' }
+  { id: 'all',  label: '전처럼 다 주문한다', tail: '그리고 전처럼 주문하기로 했다.' },
+  { id: 'some', label: '필요한 것만 주문한다', tail: '그리고 필요한 것만 주문하기로 했다.' },
+  { id: 'off',  label: '하루 더 버텨 본다', tail: '그리고 하루 더 버텨 보기로 했다.' }
 ];
 
 function fresh() {
@@ -309,14 +309,14 @@ function enter(s, i) {
 }
 function headline(s) {
   const e = s.end, day = e.scene != null ? DAYS[SCENES[e.scene].d] : '';
-  if (e.type === 'quit')   return `나는 ${day}요일, ${SCENES[e.scene].key} 앞에서 배송을 다시 켰다.`;
-  if (e.type === 'forced') return `나는 ${day}요일, ${METER[e.meter]}이 바닥나 배송을 다시 켰다.`;
-  return `나는 배송 없이 일주일을 살았다. ${FINALS.find(f => f.id === e.final).tail}`;
+  if (e.type === 'quit')   return `나는 ${day}요일, ${SCENES[e.scene].key} 앞에서 결국 주문했다.`;
+  if (e.type === 'forced') return `나는 ${day}요일, ${METER[e.meter]}이 바닥나 결국 주문했다.`;
+  return `나는 배송 없이 일주일을 버텼다. ${FINALS.find(f => f.id === e.final).tail}`;
 }
 function survived(s) { return s.end.type === 'done' ? 7 : SCENES[s.end.scene].d; }
 function finalCut(s) { return s.end.type !== 'done' ? 0 : s.end.final === 'off' ? 25 : s.end.final === 'some' ? 12 : 0; }
 function score(s) { return Math.max(0, Math.min(100, 100 - survived(s) * 5 - s.visits * 5 - finalCut(s))); }
-function tier(p) { return p >= 85 ? '뼛속까지 배송받는 인간' : p >= 60 ? '꽤 배송받는 인간' : p >= 35 ? '반쯤 배송받는 인간' : '아직은 제 발로 움직이는 인간'; }
+function tier(p) { return p >= 85 ? '뼛속까지 호모 딜리버리쿠스' : p >= 60 ? '꽤 호모 딜리버리쿠스' : p >= 35 ? '반쯤 호모 딜리버리쿠스' : '아직은 제 발로 움직이는 인간'; }
 const CH = {
   1: ['현관문 앞이 세계의 끝이다', 22], 3: ['외출은 선택이 되었고, 배송은 기본값이 되었다', 40],
   4: ['집은 더 이상 집이 아니다', 50], 5: ['우리가 잃어버린 것은 시간이 아니라 주권이었다', 57],
@@ -329,8 +329,8 @@ const METER_CH = { M: 13, T: 5, E: 28 };
 function rx(s) {
   const e = s.end, at = i => (SCENES[i].title.includes('요일') ? '' : DAYS[SCENES[i].d] + '요일 ') + `‘${SCENES[i].title}’`;
   let ch, why;
-  if (e.type === 'quit') { ch = SCENE_CH[e.scene]; why = `${at(e.scene)}에서 스위치를 올렸습니다. 그 순간을 다루는 장입니다.`; }
-  else if (e.type === 'forced') { ch = METER_CH[e.meter]; why = `${METER[e.meter]}이 바닥나 스위치가 올라갔습니다. 그 바닥을 다루는 장입니다.`; }
+  if (e.type === 'quit') { ch = SCENE_CH[e.scene]; why = `${at(e.scene)}에서 포기하고 주문했습니다. 그 순간을 다루는 장입니다.`; }
+  else if (e.type === 'forced') { ch = METER_CH[e.meter]; why = `${METER[e.meter]}이 바닥나 결국 주문했습니다. 그 바닥을 다루는 장입니다.`; }
   else { const i = s.tight ? s.tight.i : 0; ch = SCENE_CH[i]; why = `일주일 중 가장 아슬아슬했던 순간은 ${at(i)}이었습니다. 그 순간을 다루는 장입니다.`; }
   return { ch, title: CH[ch][0], page: CH[ch][1], why };
 }
@@ -369,22 +369,22 @@ function chips(s, c) {
 }
 function viewIntro() {
   return `<section class="intro">
-    <p class="eyebrow">『호모 딜리버리쿠스』로 만든 7일 실험 · 3~4분</p>
+    <p class="eyebrow">배송 없이 생존하는 현대인의 실험실 · 3~4분</p>
     <h1 tabindex="-1">배송 <em>없는</em><br>일주일</h1>
-    <p class="hook">당신은 몇 퍼센트 ‘호모 딜리버리쿠스’입니까?</p>
-    <p class="lead">『호모 딜리버리쿠스』는 배송을 삶의 운영체제(OS)라고 부릅니다. 그 스위치를 일주일만 내려 봅니다. 택배, 새벽배송, 배달 음식, 20분 장보기까지 문 앞에 아무것도 오지 않습니다. 필요한 것은 직접 가서 구하거나 없이 지냅니다. 일주일이 끝나면 답이 나옵니다.</p>
-    <div class="hero-sw">${sw(true, true, '배송 ON')}<span class="hero-hint">스위치를 내리면 월요일 0시부터 시작합니다</span></div>
+    <p class="hook">택배도 배달도 없이, 당신은 며칠을 버틸 수 있습니까?</p>
+    <p class="lead">실험 조건은 하나입니다. 일주일 동안 문 앞에 아무것도 오지 않습니다. 택배, 새벽배송, 배달 음식, 20분 장보기가 모두 멈춥니다. 필요한 것은 직접 가서 구하거나 없이 지냅니다.</p>
+    <div class="hero-sw">${sw(true, true, '배송 ON')}<span class="hero-hint">눌러서 배송을 끊으면 월요일 0시부터 실험이 시작됩니다</span></div>
     <div class="fact"><p><b>2025년 택배 물동량은 60억 개를 넘었습니다.</b> 사흘에 한 번꼴로 택배를 받는 셈입니다.</p><span class="src">『호모 딜리버리쿠스』 15·25쪽</span></div>
     <ul class="rules">
       <li><b>세 가지</b><span>시간, 기력, 안심으로 일주일을 삽니다. 안심은 필요한 것이 곧 온다는 마음입니다.</span></li>
-      <li><b>값</b><span>직접 움직이면 시간과 기력이 들고, 없이 버티면 안심이 줄어듭니다. 하나라도 바닥나면 스위치가 저절로 올라갑니다.</span></li>
-      <li><b>스위치</b><span>언제든 다시 올릴 수 있습니다. 올리는 순간 실험은 끝납니다.</span></li>
+      <li><b>값</b><span>직접 움직이면 시간과 기력이 들고, 없이 버티면 안심이 줄어듭니다. 하나라도 바닥나면 손이 먼저 주문 버튼을 누릅니다.</span></li>
+      <li><b>포기</b><span>언제든 포기하고 주문할 수 있습니다. 주문하는 순간 실험은 끝납니다.</span></li>
     </ul>
   </section>`;
 }
 
-const CONFIRM = `<div class="confirm"><p><b>스위치를 올리면 실험이 여기서 끝납니다.</b></p><div class="row">
-  <button class="btn rasp" data-act="quit">올린다</button><button class="btn ghost" data-act="stay">계속 꺼 둔다</button></div></div>`;
+const CONFIRM = `<div class="confirm"><p><b>주문하면 실험이 여기서 끝납니다.</b></p><div class="row">
+  <button class="btn rasp" data-act="quit">주문한다</button><button class="btn ghost" data-act="stay">계속 버틴다</button></div></div>`;
 
 function viewScene(s) {
   const sc = SCENES[s.i], day = DAYS[sc.d];
@@ -395,13 +395,13 @@ function viewScene(s) {
       <div class="choices">${available(s, sc).map(c =>
         `<button class="choice" data-act="pick" data-n="${sc.choices.indexOf(c)}"><span>${c.label}</span>${chips(s, c)}</button>`).join('')}</div>`;
     foot = s.confirm ? CONFIRM
-      : `<div class="tempt"><span>${sc.tempt}</span><button class="link" data-act="ask">다시 켠다</button></div>`;
+      : `<div class="tempt"><span>${sc.tempt}</span><button class="link" data-act="ask">포기하고 주문한다</button></div>`;
   } else {
     const c = sc.choices[s.pick], out = s.end && s.end.type === 'forced';
     const delta = ['T', 'E', 'M'].filter(k => c.fx[k]).map(k => `${METER[k]} ${fmt(c.fx[k])}`).join(' · ');
     main = `${head}<p class="picked">${c.label}</p><p>${c.out}</p>
       ${delta ? `<p class="src">${delta}</p>` : ''}
-      ${out ? `<p><b>${METER[s.end.meter]}이 바닥났습니다.</b> ${s.end.meter === 'M' ? '불안이 먼저 도착했습니다. ' : ''}손이 먼저 스위치를 올립니다.</p>` : ''}
+      ${out ? `<p><b>${METER[s.end.meter]}이 바닥났습니다.</b> ${s.end.meter === 'M' ? '불안이 먼저 도착했습니다. ' : ''}손이 먼저 주문 버튼을 누릅니다.</p>` : ''}
       <div class="row"><button class="btn" data-act="next">${out ? '결과 보기' : s.i === SCENES.length - 1 ? '자정으로' : '다음'}</button></div>`;
     if (s.confirm && !out) foot = CONFIRM;
   }
@@ -411,7 +411,7 @@ function viewScene(s) {
 function viewFinal(s) {
   return `${bar(false, true)}${days(7)}${meters(s)}<section class="card"><div class="card-main">
     <div class="stamp mono"><span>월 00:00</span><span>문 앞 0개</span></div><h2 tabindex="-1">자정</h2>
-    <p>일주일이 지났다. 문 앞에는 끝까지 아무것도 오지 않았다. 스위치가 손끝에 있다.</p>
+    <p>일주일이 지났다. 문 앞에는 끝까지 아무것도 오지 않았다. 실험은 끝났고, 이제 다시 주문할 수 있다.</p>
     <div class="choices">${FINALS.map(f => `<button class="choice" data-act="final" data-id="${f.id}"><span>${f.label}</span></button>`).join('')}</div>
   </div></section>`;
 }
@@ -419,17 +419,17 @@ function viewFinal(s) {
 function viewResult(s) {
   const on = !(s.end.type === 'done' && s.end.final === 'off');
   const n = survived(s), pct = score(s), fc = finalCut(s), r = rx(s);
-  const calc = `100 − 버틴 날 ${n}일×5 − 직접 간 곳 ${s.visits}곳×5${fc ? ` − ${s.end.final === 'off' ? '하루 더 꺼 둠' : '필요한 것만 켬'} ${fc}` : ''} = ${pct}`;
+  const calc = `100 − 버틴 날 ${n}일×5 − 직접 간 곳 ${s.visits}곳×5${fc ? ` − ${s.end.final === 'off' ? '하루 더 버팀' : '필요한 것만 주문'} ${fc}` : ''} = ${pct}`;
   return `${bar(on, true)}${days(n, true)}
   <section class="bill">
     <div class="bill-top"><span>HOMO DELIVERICUS</span><span class="mono">${n} / 7</span></div>
-    <dl class="to"><dt>보낸 곳</dt><dd>배송 없는 일주일</dd><dt>받는 분</dt><dd>당신</dd><dt>품명</dt><dd class="hl">배송받는 인간 ${pct}%</dd></dl>
+    <dl class="to"><dt>보낸 곳</dt><dd>배송 없는 일주일</dd><dt>받는 분</dt><dd>당신</dd><dt>품명</dt><dd class="hl">배송 의존도 ${pct}%</dd></dl>
     <div class="verdict">
-      <h2 tabindex="-1">당신은 ‘호모 딜리버리쿠스’입니까?</h2>
+      <h2 tabindex="-1">실험 결과 · 당신의 배송 의존도</h2>
       <p class="pct" aria-label="${pct}퍼센트"><b>${pct}</b><span>%</span></p>
       <div class="gauge" aria-hidden="true"><i style="width:${pct}%"></i></div>
       <p class="tier">${tier(pct)}</p>
-      <p class="src">호모 딜리버리쿠스(Homo Delivericus)는 책이 붙인 이름으로, ‘배송받는 인간’이라는 뜻입니다.</p>
+      <p class="src">호모 딜리버리쿠스(Homo Delivericus)는 ‘배송받는 인간’이라는 뜻으로, 같은 제목의 책이 붙인 이름입니다.</p>
     </div>
     <p class="sent">${headline(s)}</p>
     <p class="src calc">${calc}</p>
@@ -448,7 +448,7 @@ function viewResult(s) {
     </div>
     <p class="half"><b>당신이 본 것은 문 안쪽입니다.</b> 문 밖에서 그 상자를 나르는 사람들은 4부 ‘부품이 된 인간’에, 당신이 정하기 전에 먼저 정하는 AI는 5부 ‘AI가 설계하는 삶’에 있습니다.</p>
     <div class="door"><div class="door-floor">${on ? '<span class="bx"></span><span class="bx"></span><span class="bx"></span>' : ''}</div>
-      <span class="door-cap">${on ? '스위치를 올리자 문 앞이 다시 차기 시작합니다.' : '문 앞은 오늘도 비어 있습니다.'}</span></div>
+      <span class="door-cap">${on ? '주문하자 문 앞이 다시 차기 시작합니다.' : '문 앞은 오늘도 비어 있습니다.'}</span></div>
     <p class="ask">“당신은 움직이는가, 움직여지는가?”</p><span class="src">『호모 딜리버리쿠스』 19쪽</span>
     <div class="bc" aria-hidden="true"></div>
     <div class="bill-foot"><p class="title-line"><b>호모 딜리버리쿠스</b>배송 문명은 어떻게 우리를 바꿨는가<br>김철민 지음 · 홀리데이북스</p><span class="caution">취급주의</span></div>
@@ -478,7 +478,7 @@ async function makeCard(s) {
   const W = 1080, H = 1350, c = document.createElement('canvas'); c.width = W; c.height = H;
   const g = c.getContext('2d'), pct = score(s), r = rx(s), n = survived(s);
   const sent = headline(s), chap = `${r.ch}장 ${r.title}`;
-  try { await Promise.all([900, 700, 500].map(w => document.fonts.load(FONT(w, 40), sent + chap + tier(pct) + '당신은호모딜리버리쿠스입니까에게배송된쪽부터김철민지음홀리데이북스없는일주일취급주의'))); } catch (e) {}
+  try { await Promise.all([900, 700, 500].map(w => document.fonts.load(FONT(w, 40), sent + chap + tier(pct) + '당신나의배송의존도호모딜리버리쿠스에게된쪽부터김철민지음홀리데이북스없는일주일취급주의'))); } catch (e) {}
   g.fillStyle = IMG.box; g.fillRect(0, 0, W, H);
   roundRect(g, 54, 54, W - 108, H - 108, 34); g.fillStyle = IMG.paper; g.fill(); g.lineWidth = 12; g.strokeStyle = IMG.rasp; g.stroke();
   const L = 118, R = W - 118, IW = R - L; let y = 152;
@@ -487,7 +487,7 @@ async function makeCard(s) {
   g.fillStyle = IMG.ink; g.font = FONT(900, 30); g.fillText('HOMO DELIVERICUS', L, y);
   g.fillStyle = IMG.rasp; g.textAlign = 'right'; g.fillText(`${n} / 7`, R, y); g.textAlign = 'left';
   g.fillRect(L, y + 20, IW, 6);
-  y += 104; g.fillStyle = IMG.ink; g.font = FONT(900, 44); g.fillText('당신은 ‘호모 딜리버리쿠스’입니까?', L, y);
+  y += 104; g.fillStyle = IMG.ink; g.font = FONT(900, 44); g.fillText('배송 없는 일주일 · 나의 배송 의존도', L, y);
   y += 262; g.fillStyle = IMG.rasp; g.font = FONT(900, 290); const num = String(pct); g.fillText(num, L - 14, y);
   const nw = g.measureText(num).width; g.font = FONT(900, 116); g.fillText('%', L - 14 + nw + 8, y);
   y += 40; roundRect(g, L, y, IW, 26, 13); g.fillStyle = '#FFFFFF'; g.fill();
