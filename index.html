@@ -521,11 +521,9 @@ function viewResult(s) {
     <div class="bill-foot"><p class="title-line"><b>호모 딜리버리쿠스</b>배송 문명은 어떻게 우리를 바꿨는가<br>김철민 지음 · 홀리데이북스</p><span class="caution">취급주의</span></div>
   </section>
   <div class="acts">
-    <button class="btn" data-act="save">결과 이미지 저장</button>
     <div class="row">
-      ${canShare() ? '<button class="btn ghost" data-act="share">공유하기</button>' : ''}
-      <button class="btn ghost" data-act="copylink">링크 복사</button>
-      <a class="btn ghost" href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(SITE)}" target="_blank" rel="noopener">페이스북</a>
+      <button class="btn" data-act="save">결과 이미지 저장</button>
+      <button class="btn ghost" data-act="share">결과 공유하기</button>
     </div>
     <button class="link again" data-act="again">처음부터 다시</button>
   </div>
@@ -669,10 +667,10 @@ app.addEventListener('click', ev => {
   } else if (act === 'again') { state = fresh(); render(true);
   } else if (act === 'save') { saveCard();
   } else if (act === 'share') {
-    try { navigator.share({ title: '배송 없는 일주일', text: shareLine(s), url: SITE }).catch(() => {}); } catch (e) {}
-  } else if (act === 'copylink') {
-    const toast = document.getElementById('toast'), manual = () => { toast.textContent = SITE; };
-    try { navigator.clipboard.writeText(SITE).then(() => { toast.textContent = '링크를 복사했습니다.'; }, manual); } catch (e) { manual(); }
+    const toast = document.getElementById('toast'), text = `${shareLine(s)}\n${SITE}`;
+    const manual = () => { toast.textContent = text; };
+    if (canShare()) { try { navigator.share({ title: '배송 없는 일주일', text: shareLine(s), url: SITE }).catch(() => {}); } catch (e) { manual(); } }
+    else { try { navigator.clipboard.writeText(text).then(() => { toast.textContent = '결과 문구와 링크를 복사했습니다. 붙여 넣어 공유해 주세요.'; }, manual); } catch (e) { manual(); } }
   }
 });
 
