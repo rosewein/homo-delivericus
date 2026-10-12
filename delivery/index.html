@@ -520,7 +520,7 @@ function viewResult(s) {
       <span class="door-cap">${on ? '주문하자 문 앞이 다시 차기 시작합니다.' : '문 앞은 오늘도 비어 있습니다.'}</span></div>
     <p class="ask">“당신은 움직이는가, 움직여지는가?”</p>
     <div class="bc" aria-hidden="true"></div>
-    <div class="bill-foot"><p class="title-line"><b>호모 딜리버리쿠스</b>배송 문명은 어떻게 우리를 바꿨는가<br>김철민 지음 · 홀리데이북스</p><span class="caution">취급주의</span></div>
+    <div class="bill-foot"><p class="title-line"><b>호모 딜리버리쿠스</b>배송 문명은 어떻게 우리를 바꿨는가<br>김철민 지음 · 홀리데이북스<br><span class="mono">lab.holidaybooks.co.kr</span></p><span class="caution">취급주의</span></div>
   </section>
   <div class="acts">
     <div class="row">
@@ -581,7 +581,7 @@ async function makeCard(s) {
   dash(1178);
   g.fillStyle = IMG.rasp; g.font = FONT(900, 36); g.fillText('호모 딜리버리쿠스', L, 1232);
   g.fillStyle = IMG.ink; g.font = FONT(500, 26); g.fillText('김철민 지음 · 홀리데이북스', L, 1270);
-  g.fillStyle = IMG.muted; g.textAlign = 'right'; g.fillText('배송 없는 일주일', R, 1270); g.textAlign = 'left';
+  g.fillStyle = IMG.ink; g.font = FONT(700, 26); g.textAlign = 'right'; g.fillText('lab.holidaybooks.co.kr', R, 1270); g.textAlign = 'left';
   g.save(); g.translate(R - 150, 1196); g.rotate(-0.05); roundRect(g, 0, 0, 150, 46, 7); g.lineWidth = 4; g.strokeStyle = IMG.rasp; g.stroke();
   g.fillStyle = IMG.rasp; g.font = FONT(900, 24); g.textAlign = 'center'; g.fillText('취급주의', 75, 33); g.restore();
   c._bottom = y;
