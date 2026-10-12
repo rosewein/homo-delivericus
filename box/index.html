@@ -747,10 +747,15 @@ async function saveCard() {
   try {
     if (DL) { await DL.save({ filename: job.name, data: job.blob }); toast.textContent = '이미지를 저장했습니다.'; return; }
     if (!window.claude) {
+      /* 아이폰·아이패드는 내려받기가 '파일' 앱으로만 가서, 사진 앱에 넣으려면 공유 창의 '이미지 저장'을 거쳐야 한다. 그 밖에는 바로 내려받는다. */
+      const ios = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       const file = new File([job.blob], job.name, { type: 'image/png' });
-      if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file] }); toast.textContent = ''; return; }
+      if (ios && navigator.canShare && navigator.canShare({ files: [file] })) {
+        toast.textContent = '열린 창에서 ‘이미지 저장’을 고르면 사진 앱에 저장됩니다.';
+        await navigator.share({ files: [file] }); return;
+      }
       const a = document.createElement('a'); a.href = url; a.download = job.name; document.body.appendChild(a); a.click(); a.remove();
-      toast.textContent = '이미지를 저장했습니다.'; return;
+      toast.textContent = '이미지를 내려받았습니다. 보이지 않으면 아래 이미지를 길게 눌러 저장해 주세요.'; return;
     }
     toast.textContent = hint;
   } catch (e) { toast.textContent = hint; }
