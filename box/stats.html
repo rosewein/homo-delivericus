@@ -69,7 +69,7 @@ button,input{font:inherit;color:inherit}
 <div class="wrap">
   <div class="head">
     <div><h1>문 앞까지 현황판</h1><p class="sub" id="stamp">암호를 넣으면 지금까지 쌓인 결과가 보입니다.</p></div>
-    <div class="row" id="tools" hidden><button class="btn ghost" id="reload">새로 고침</button><button class="btn ghost" id="forget">암호 지우기</button></div>
+    <div class="row" id="tools" hidden><button class="btn ghost" id="reload">새로 고침</button><button class="btn ghost" id="forget">암호 지우기</button><button class="btn" id="shot">이미지로 저장</button></div>
   </div>
 
   <form class="gate" id="gate">
@@ -196,6 +196,26 @@ async function load(code, fromForm) {
 $('gate').addEventListener('submit', ev => { ev.preventDefault(); const v = $('code').value; if (v) load(v, true); });
 $('reload').addEventListener('click', () => { const c = store.get(); if (c) load(c, false); });
 $('forget').addEventListener('click', () => { store.clear(); $('board').hidden = true; $('tools').hidden = true; $('gate').hidden = false; $('code').value = ''; $('msg').textContent = '이 기기에서 암호를 지웠습니다.'; $('stamp').textContent = '암호를 넣으면 지금까지 쌓인 결과가 보입니다.'; });
+/* 현황판을 이미지 한 장으로: 화면에 보이는 그대로 그려서 내려받는다(버튼 줄은 빼고). */
+async function savePage() {
+  const btn = $('shot'), label = btn.textContent;
+  const fail = () => { btn.textContent = '만들지 못했습니다'; setTimeout(() => { btn.textContent = label; btn.disabled = false; }, 2500); };
+  btn.disabled = true; btn.textContent = '만드는 중…';
+  try {
+    if (!window.html2canvas) await new Promise((ok, no) => { const s = document.createElement('script'); s.src = '/vendor/html2canvas.min.js'; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
+    try { await document.fonts.ready; } catch (e) {}
+    const cv = await html2canvas(document.querySelector('.wrap'), { backgroundColor: getComputedStyle(document.body).backgroundColor, scale: 2, logging: false, ignoreElements: el => el.id === 'tools' || el.id === 'gate' });
+    const blob = await new Promise(r => cv.toBlob(r, 'image/png'));
+    if (!blob) return fail();
+    const d = new Date(), name = `${GAME}-stats-${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}.png`;
+    const ios = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const file = new File([blob], name, { type: 'image/png' });
+    if (ios && navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file] }); } catch (e) {} }
+    else { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
+    btn.textContent = label; btn.disabled = false;
+  } catch (e) { fail(); }
+}
+$('shot').addEventListener('click', savePage);
 const saved = store.get(); if (saved) load(saved, false);
 </script>
 </body>
