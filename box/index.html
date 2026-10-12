@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="robots" content="noindex">
+<link rel="canonical" href="https://lab.holidaybooks.co.kr/box/">
 <meta name="description" content="택배 상자, 우유, 분유, 치킨. 주문된 물건이 되어 문 앞까지 가 봅니다. 2~3분이면 끝납니다.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="이번에는 당신이 배송됩니다">
@@ -533,6 +533,24 @@ async function sbCall(fn, body) {
   if (!res.ok) throw new Error('sb ' + res.status);
   return res.status === 204 ? null : res.json();
 }
+const GAME = 'box';
+/* 어디서 들어왔는지: 앱이나 사이트 이름 한 단어만 남긴다. 주소 전체나 기기 정보는 남기지 않는다. 링크 끝에 ?s=이름 을 붙이면 그 이름으로 센다. */
+function srcOf() {
+  try { const saved = sessionStorage.getItem('lab_src'); if (saved) return saved; } catch (e) {}
+  const q = new URLSearchParams(location.search), ua = navigator.userAgent;
+  let s = (q.get('s') || q.get('utm_source') || '').toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 20), h = '';
+  try { h = document.referrer ? new URL(document.referrer).hostname : ''; } catch (e) {}
+  if (!s) s = /KAKAOTALK/i.test(ua) ? 'kakaotalk' : /Instagram/i.test(ua) ? 'instagram' : /FBAN|FBAV|FB_IAB/i.test(ua) ? 'facebook' : /NAVER\(inapp/i.test(ua) ? 'naver' : /\bLine\//i.test(ua) ? 'line'
+    : !h ? 'direct' : h === location.hostname ? 'lab' : /facebook\.com$/.test(h) ? 'facebook' : /instagram\.com$/.test(h) ? 'instagram' : /threads\.(net|com)$/.test(h) ? 'threads'
+    : /(^|\.)(t\.co|twitter\.com|x\.com)$/.test(h) ? 'x' : /naver\.com$/.test(h) ? 'naver' : /(^|\.)google\./.test(h) ? 'google' : /(daum\.net|kakao\.com)$/.test(h) ? 'kakao' : 'other';
+  try { sessionStorage.setItem('lab_src', s); } catch (e) {}
+  return s;
+}
+function mark(kind) {
+  if (!sbOn() || /bot|crawl|spider|slurp|preview|facebookexternalhit|scrap|yeti|headless|lighthouse/i.test(navigator.userAgent)) return;
+  try { const k = `lab_${kind}_${GAME}`; if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, '1'); } catch (e) {}
+  sbCall('lab_event', { p_game: GAME, p_src: srcOf(), p_kind: kind }).catch(() => {});
+}
 const num = n => Number(n).toLocaleString('ko-KR');
 function crowdLine(s) {
   const st = s.stats;
@@ -764,7 +782,7 @@ async function saveCard() {
 function render(focus) {
   const s = state;
   app.innerHTML = s.phase === 'intro' ? viewIntro() : s.phase === 'result' ? viewResult(s) : viewScene(s);
-  if (s.phase === 'result') { BEEN.add(s.route); prepareCard(); askCrowd(); } else CARD = null;
+  if (s.phase === 'result') { BEEN.add(s.route); prepareCard(); askCrowd(); mark('done'); } else CARD = null;
   if (s.phase === 'intro') askTotal();
   if (focus) {
     window.scrollTo(0, 0);
@@ -801,6 +819,7 @@ app.addEventListener('click', ev => {
 
 function start(data) {
   const col = document.getElementById('collect'); if (col && sbOn()) col.hidden = false;
+  mark('visit');
   if (data && data.state && data.state.phase) state = data.state;
   render(false);
 }

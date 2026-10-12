@@ -118,7 +118,7 @@ function render(d) {
     <div class="tile"><span>일주일 완주</span><b>${n0(d.done)}<small>명</small></b><em>참여자의 ${share(d.done, T)}%</em></div>
     <div class="tile"><span>평균 배송 의존도</span><b>${n0(d.avg_pct)}<small>%</small></b><em>낮을수록 오래 버팀</em></div>
     <div class="tile"><span>서점 버튼 클릭</span><b>${n0(clicks)}<small>번</small></b><em>참여자 100명당 ${T ? Math.round(clicks / T * 100) : 0}번</em></div>
-  </div>`;
+  </div><div id="srcbox" style="display:flex;flex-direction:column;gap:28px"></div>`;
   if (!T) { $('board').innerHTML = html + '<p class="empty">아직 쌓인 결과가 없습니다. 누군가 한 판을 끝내면 여기에 나타납니다.</p>'; return; }
 
   const at = SCENES.map((s, i) => { const q = sum(d.ends.filter(e => e.end_type === 'quit' && e.scene === i)), f = sum(d.ends.filter(e => e.end_type === 'forced' && e.scene === i));
@@ -145,6 +145,28 @@ function render(d) {
   $('board').innerHTML = html;
 }
 
+const GAME = 'delivery';
+/* 어디서 들어왔나: 방문과 끝까지 한 수를 출처별로 */
+const SRC_NAME = { kakaotalk: '카카오톡(앱 안)', facebook: '페이스북', instagram: '인스타그램', threads: '스레드', x: 'X(트위터)', naver: '네이버', google: '구글', kakao: '다음·카카오', line: '라인', lab: '실험실 대문에서', direct: '직접·알 수 없음', other: '그 밖의 사이트' };
+async function loadSrc(code) {
+  const box = $('srcbox'); if (!box) return;
+  try {
+    const r = await fetch(`${SB.url}/rest/v1/rpc/lab_stats`, { method: 'POST', headers: { apikey: SB.key, Authorization: `Bearer ${SB.key}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ p_code: code }) });
+    if (r.status === 404) { box.innerHTML = panel('어디서 들어왔나', '출처를 세는 표가 아직 없습니다. SQL을 실행하면 그때부터 쌓입니다.', ''); return; }
+    const d = r.ok ? await r.json() : null; if (!d) return;
+    const group = (game, title, note) => {
+      const rows = d.rows.filter(x => x.game === game), get = (src, kind) => (rows.find(x => x.src === src && x.kind === kind) || { n: 0 }).n;
+      const srcs = [...new Set(rows.map(x => x.src))].sort((a, b) => get(b, 'visit') - get(a, 'visit'));
+      const total = srcs.reduce((a, s) => a + get(s, 'visit'), 0), done = srcs.reduce((a, s) => a + get(s, 'done'), 0);
+      if (!total) return panel(title, '아직 기록이 없습니다.', '');
+      return panel(`${title} · 방문 ${n0(total)}${game === 'hub' ? '' : ` · 끝까지 ${n0(done)}`}`, note,
+        bars(srcs.map(s => ({ label: SRC_NAME[s] || `?s=${s}`, sub: game === 'hub' ? '' : `끝까지 ${n0(get(s, 'done'))}명`, n: get(s, 'visit') })), total, '번'));
+    };
+    box.innerHTML = group(GAME, '어디서 들어왔나', '탭 하나를 방문 한 번으로 셉니다. ‘직접·알 수 없음’에는 주소를 직접 친 경우와, 카카오톡 PC판처럼 출처를 남기지 않고 여는 경우가 함께 들어갑니다. 링크 끝에 ?s=이름 을 붙여 올리면 그 이름으로 따로 셉니다.')
+      + group('hub', '실험실 대문', 'lab.holidaybooks.co.kr 첫 화면에 들어온 수입니다.');
+  } catch (e) {}
+}
+
 async function load(code, fromForm) {
   $('msg').textContent = '불러오는 중입니다.';
   try {
@@ -152,7 +174,7 @@ async function load(code, fromForm) {
     if (!d) { store.clear(); $('gate').hidden = false; $('board').hidden = true; $('tools').hidden = true; $('msg').textContent = '암호가 맞지 않습니다.'; return; }
     if (fromForm) store.set(code, $('keep').checked);
     $('msg').textContent = ''; $('gate').hidden = true; $('board').hidden = false; $('tools').hidden = false;
-    render(d);
+    render(d); loadSrc(code);
   } catch (e) { $('msg').textContent = '불러오지 못했습니다. 잠시 뒤 다시 눌러 주세요. (' + e.message + ')'; }
 }
 $('gate').addEventListener('submit', ev => { ev.preventDefault(); const v = $('code').value; if (v) load(v, true); });
