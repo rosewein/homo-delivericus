@@ -87,6 +87,7 @@ button{font:inherit;color:inherit}
 .stamp{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:13px;color:var(--muted)}
 .card.me .stamp span:last-child{color:var(--rasp);font-weight:700}
 .card h2{font-size:26px;font-weight:900;line-height:1.25;letter-spacing:-.01em}
+.who{font-size:14px;font-weight:700;color:var(--rasp);margin-bottom:-4px}
 .choices{display:flex;flex-direction:column;gap:10px}
 .choice{display:flex;align-items:center;width:100%;text-align:left;min-height:56px;padding:12px 14px;border:2px solid var(--ink);border-radius:12px;background:var(--paper);cursor:pointer;font-weight:700;transition:transform .12s}
 .choice:hover{transform:translateY(-1px)}
@@ -176,7 +177,7 @@ const ROUTES = {
         body: '누군가 결제 버튼을 눌렀다. 손 하나가 책 한 권을 당신 안에 넣고 테이프를 두른다. 옆구리에 운송장이 붙는다. 이제 당신은 이름 대신 번호로 불린다.' },
       { step: 1, at: hm(0, 23, 50), where: '화물 트럭', title: '밤길', art: 'truck', hands: ['싣는 손'], go: '내려진다',
         body: '다른 상자들 틈에 끼어 트럭에 쌓인다. 문이 닫히고 캄캄해진다. 밤새 흔들린다. 어디를 지나는지 당신은 모른다.' },
-      { step: 2, at: hm(1, 12, 40), where: '택배 차', title: '200개 중 하나', art: 'van', hands: ['택배 기사'],
+      { step: 2, at: hm(1, 12, 40), where: '택배 차', title: '200개 중 하나', art: 'van', hands: ['택배 기사'], who: '택배 기사가',
         body: '아침에 택배 기사의 차로 옮겨졌다. 오늘 이 차가 돌아야 할 상자는 200개쯤, 도는 순서는 단말기가 정했다. 지금 남은 것은 121개. 기사가 운전석에서 김밥 한 줄을 푼다.',
         choices: [
           { id: 'eat', label: '기사는 김밥을 다 먹고 출발한다', late: 10, unseen: '김밥 한 줄을 다 먹는 데 쓴 10분',
@@ -184,7 +185,7 @@ const ROUTES = {
           { id: 'go', label: '기사는 두 개만 집어 먹고 출발한다', unseen: '조수석에 남은 김밥 여덟 개',
             out: '남은 김밥이 조수석에 놓인다. 차가 움직인다. 다음 집 앞에서 숫자가 120이 된다.' }
         ] },
-      { step: 3, at: hm(1, 14, 20), drift: true, where: '아파트 지하 주차장', title: '지하 주차장', art: 'cart',
+      { step: 3, at: hm(1, 14, 20), drift: true, where: '아파트 지하 주차장', title: '지하 주차장', art: 'cart', who: '택배 기사가',
         body: '이 단지는 택배 차가 지상으로 다닐 수 없다. 기사는 지하에서 당신을 카트에 옮겨 싣는다. 바퀴 소리가 주차장에 울린다. 엘리베이터는 17층에 서 있다. 당신은 4층으로 간다.',
         choices: [
           { id: 'lift', label: '기사는 엘리베이터를 기다린다', late: 6, unseen: '엘리베이터 앞에서 기다린 6분',
@@ -213,7 +214,7 @@ const ROUTES = {
         body: '밤 11시 마감을 2분 남기고 주문이 들어왔다. 축구장 수십 개만 한 물류센터, 수십만 가지 물건 사이에서 손 하나가 당신을 집는다. 계란, 빵과 함께 보냉가방에 담긴다.' },
       { step: 1, at: hm(1, 1, 30), where: '캠프', title: '캠프', art: 'camp', hands: ['나누는 손'], go: '실린다',
         body: '한밤에 도심 가까운 ‘캠프’에 내려진다. 동네별로 한 번 더 나뉜다. 당신이 탈 차가 정해진다. 기사의 단말기에 오늘 돌 집이 순서대로 뜬다. 모두 아침 7시 전이다.' },
-      { step: 2, at: hm(1, 4, 38), where: '공동현관', title: '공동현관', art: 'lobby', hands: ['배송 기사'],
+      { step: 2, at: hm(1, 4, 38), where: '공동현관', title: '공동현관', art: 'lobby', hands: ['배송 기사'], who: '배송 기사가',
         body: '새벽 4시 38분. 오는 길은 비어 있었다. 이 건물에서 깨어 있는 사람은 기사 한 명뿐이다. 주문서에 적힌 공동현관 비밀번호를 누른다. 문이 열리지 않는다. 번호가 바뀐 모양이다.',
         choices: [
           { id: 'call', label: '기사는 주문한 사람에게 전화를 건다', late: 2, set: { woke: 1 }, unseen: '새벽 4시 38분에 걸어야 했던 전화',
@@ -243,14 +244,14 @@ const ROUTES = {
     track: s => [[hm(0, 23, 42), '주문 접수'], [hm(0, 23, 45) + (s.flags.guest ? 2 : 0), '픽업'],
       [arrive(s), s.late ? `배송 완료 · 예정보다 ${s.late}분 늦음` : '배송 완료 · 예정대로']],
     scenes: [
-      { step: 0, at: hm(0, 23, 42), where: '어느 집', title: '요청 사항', art: 'note',
+      { step: 0, at: hm(0, 23, 42), where: '어느 집', title: '요청 사항', art: 'note', who: '주문하는 사람이',
         body: '한밤중, 어느 집에서 분유가 떨어졌다. 아기가 운다. 주문하는 사람의 손가락이 ‘요청 사항’ 칸 위에서 멈춘다.',
         choices: [
           { id: 'fast', label: '“최대한 빨리 부탁드려요”라고 적는다', set: { note: '최대한 빨리 부탁드려요' } },
           { id: 'slow', label: '“천천히 안전하게 오세요”라고 적는다', set: { note: '천천히 안전하게 오세요' } },
           { id: 'blank', label: '아무것도 적지 않는다' }
         ].map(c => ({ ...c, out: '주문 버튼이 눌린다. 그 집에서 가장 가깝고 재고가 있는 편의점으로 주문이 넘어간다. 점원이 선반에서 당신을 꺼내 봉투에 담는다.' })) },
-      { step: 1, at: hm(0, 23, 45), where: '편의점', title: '계산대', art: 'counter', hands: ['점원', '라이더'],
+      { step: 1, at: hm(0, 23, 45), where: '편의점', title: '계산대', art: 'counter', hands: ['점원', '라이더'], who: '점원이',
         body: '봉투에 ‘퀵커머스 배송 상품’ 딱지가 붙는다. 헬멧을 쓴 라이더가 들어와 픽업 번호를 부른다. 같은 순간, 손님 하나가 계산대에 컵라면을 올려놓는다. 점원은 혼자다.',
         choices: [
           { id: 'rider', label: '점원은 라이더에게 당신을 먼저 건넨다', set: { riderFirst: 1 }, unseen: '계산대 앞에서 순서를 내준 손님',
@@ -258,7 +259,7 @@ const ROUTES = {
           { id: 'guest', label: '점원은 손님 계산부터 한다', late: 2, set: { guest: 1 }, unseen: '라이더가 계산대 옆에서 기다린 2분',
             out: '바코드 찍는 소리가 난다. 라이더는 화면의 남은 시간을 본다. 2분 뒤, 당신이 그의 손으로 넘어간다.' }
         ] },
-      { step: 2, at: hm(0, 23, 47), drift: true, where: '골목', title: '남은 시간', art: 'ride',
+      { step: 2, at: hm(0, 23, 47), drift: true, where: '골목', title: '남은 시간', art: 'ride', who: '라이더가',
         unseen: s => (s.flags.note ? [`“${s.flags.note}”라고 적어도 그대로였던 남은 시간`] : []),
         body: s => `배달통 뚜껑이 닫힌다. 라이더의 화면에 남은 시간은 ${7 - s.late}분. 내비가 그린 큰길로는 9분이 걸린다. ${s.flags.note ? `화면 아래에 요청 사항이 작게 떠 있다. “${s.flags.note}.” ` : ''}그는 이 동네 골목을 20년 다녔다.`,
         choices: [
@@ -280,14 +281,14 @@ const ROUTES = {
     steps: ['콜', '주방', '길', '문 앞'], order: hm(0, 19, 2), doorArt: 'fooddoor',
     track: () => [[hm(0, 19, 2), '주문 접수'], [hm(0, 19, 27), '픽업'], [hm(0, 19, 49), '배송 완료 · 예정보다 16분 늦음']],
     scenes: [
-      { step: 0, at: hm(0, 19, 12), where: '치킨집', title: '콜', art: 'accept', hands: ['튀기는 손'],
+      { step: 0, at: hm(0, 19, 12), where: '치킨집', title: '콜', art: 'accept', hands: ['튀기는 손'], who: '라이더가',
         body: '당신은 아직 기름 속에 있다. 가게 밖에 서 있던 라이더의 휴대폰이 울린다. 화면에는 가져갈 곳, 가져다줄 곳, 걸릴 시간, 갈 길이 이미 그려져 있다.',
         choices: [{ id: 'accept', label: '수락', one: true, out: '라이더가 가게로 들어와 주방 앞에 선다. 그의 앞에 헬멧 둘이 먼저 서 있다.' }] },
       { step: 1, at: hm(0, 19, 20), where: '치킨집 주방 앞', title: '주방 앞', art: 'kitchen', hands: ['라이더'], unseen: ['가게에서 늦게 나온 7분'], go: '실린다',
         body: '금요일 저녁, 주문이 몰린다. 주문서에 적힌 조리 완료 시각은 19시 20분. 당신이 봉투에 담겨 라이더의 손에 넘어간 것은 19시 27분이다. 화면의 시계는 19시 20분부터 돌고 있었다.' },
       { step: 2, at: hm(0, 19, 40), where: '아파트 단지', title: '302동 1104호', art: 'wrong', unseen: ['잘못 적힌 주소를 찾아 돈 9분'], go: '다시 실린다',
         body: '라이더가 302동 1104호의 벨을 누른다. 낯선 사람이 문을 연다. “안 시켰는데요.” 라이더가 주문한 사람에게 전화를 건다. “아, 320동이에요. 잘못 눌렀네요.” 320동은 단지 반대편이다.' },
-      { step: 3, at: hm(0, 19, 49), arrive: true, where: '320동 11층', title: '문 앞', art: 'fooddoor',
+      { step: 3, at: hm(0, 19, 49), arrive: true, where: '320동 11층', title: '문 앞', art: 'fooddoor', who: '라이더가',
         body: '봉투가 문 앞에 놓인다. 라이더의 화면에는 ‘16분 늦음’이 빨갛게 떠 있다. 문 안쪽에서 목소리가 들린다. “문 앞에 두고 가세요.”',
         choices: [
           { id: 'msg', label: '라이더는 “늦어서 죄송합니다. 맛있게 드세요” 하고 메시지를 보낸다', set: { msg: 1 }, unseen: '평점이 깎일까 봐 빼먹지 않는 한 줄',
@@ -328,6 +329,14 @@ function choose(s, c) {
 const at = (s, sc = scene(s)) => sc.at + (sc.drift ? s.late : 0);
 function arrive(s) { const sc = route(s).scenes.find(x => x.arrive); return sc.at + (sc.drift ? s.late : 0); }
 const lateOf = s => route(s).fixedLate ?? s.late;
+/* 지금 누가 고르는지 한 줄: 처음이면 이름만, 바뀌었으면 '이번에는', 이어지면 '이번에도' */
+const chooser = sc => (sc.me ? '당신이' : sc.who);
+function whoLine(s) {
+  const list = route(s).scenes, now = chooser(list[s.i]);
+  let prev = null;
+  for (let k = s.i - 1; k >= 0 && !prev; k--) if (list[k].choices) prev = chooser(list[k]);
+  return `${prev ? (prev === now ? '이번에도 ' : '이번에는 ') : ''}${now} 고릅니다`;
+}
 const elapsed = s => arrive(s) - route(s).order;
 const when = (s, t) => (route(s).days ? (t < D ? '어제 ' : '오늘 ') : '') + clock(t);
 function headline(s) { const r = route(s); return `나는 ${r.name}${r.was}. 손 ${s.hands.length}개를 거쳐 ${span(elapsed(s))} 만에 문 앞에 놓였다.`; }
@@ -344,7 +353,7 @@ function lines(s) {
   if (s.route === 'box') return { text: [f === 'open' ? '문이 열렸고, “수고하셨습니다” 한마디가 건너갔다.' : '문은 열리지 않았다. 문자 한 통이 읽혔다.'] };
   if (s.route === 'dawn') return { text: [{
     fix: '받는 사람은 공동현관 번호를 고쳐 두었다. 다음 새벽에는 그 문이 한 번에 열린다.',
-    complain: '받는 사람은 고객센터에 한 줄을 남겼다. 바뀐 번호를 알리지 않은 쪽은 받는 사람이었다.',
+    complain: '받는 사람은 고객센터에 한 줄을 남겼다. 주문서에는 아직 예전 번호가 적혀 있다.',
     none: '받는 사람은 가방을 들였다. 누가 다녀갔는지는 끝내 모른다.' }[f]] };
   const src = n >= 3 ? '『호모 딜리버리쿠스』 166쪽' : n === 1 ? '『호모 딜리버리쿠스』 167쪽' : '';
   if (s.route === 'quick') return { text: [
@@ -596,7 +605,7 @@ function viewScene(s) {
   if (s.phase === 'scene') {
     const list = options(s, sc);
     main = `${head}<p>${val(sc.body, s)}</p>${list.length
-      ? `<div class="choices">${list.map(c => `<button class="choice${c.one ? ' one' : ''}" data-act="pick" data-id="${c.id}"><span>${c.label}</span></button>`).join('')}</div>`
+      ? `<p class="who">${whoLine(s)}</p><div class="choices">${list.map(c => `<button class="choice${c.one ? ' one' : ''}" data-act="pick" data-id="${c.id}"><span>${c.label}</span></button>`).join('')}</div>`
       : `<div class="row"><button class="btn" data-act="next">${sc.go}</button></div>`}`;
   } else {
     const c = sc.choices.find(x => x.id === s.pick);

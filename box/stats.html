@@ -58,6 +58,10 @@ button,input{font:inherit;color:inherit}
 .empty{padding:18px;border:2px dashed var(--line);border-radius:12px;color:var(--muted)}
 .foot{font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
 .foot a{color:inherit}
+.says{margin:0;padding:0;list-style:none;display:flex;flex-direction:column}
+.says li{padding:9px 0;border-top:1px solid var(--line);font-size:15px}
+.says li b{font-size:17px;font-weight:500;margin-right:4px}
+.says li small{display:block;font-size:12.5px;color:var(--muted)}
 [hidden]{display:none!important}
 </style>
 </head>
@@ -129,6 +133,21 @@ function render(d) {
   </div>`;
   if (!T) { $('board').innerHTML = html + '<p class="empty">아직 쌓인 결과가 없습니다. 누군가 한 판을 끝내면 여기에 나타납니다.</p>'; return; }
 
+  /* 글감으로 바로 옮겨 적을 수 있는 문장들 */
+  const pk = (id, k, c) => sum(d.picks.filter(x => x.route === id && x.picks.split(',')[k] === c));
+  const say = (n, t, text) => (t ? `<li><b class="num">${share(n, t)}%</b> ${text} <small>${n0(t)}명 중 ${n0(n)}명</small></li>` : '');
+  const called = pk('dawn', 0, 'call');
+  const says = [
+    say(pk('box', 2, 'open'), per('box'), '택배 상자가 문 앞에 놓였을 때 문을 열고 “수고하셨습니다”라고 말했습니다.'),
+    say(pk('box', 1, 'stairs'), per('box'), '엘리베이터를 기다리는 대신 기사가 계단으로 오르게 했습니다.'),
+    say(pk('food', 2, 's1'), per('food'), '16분 늦은 치킨에 별 한 개를 줬습니다. 늦은 까닭은 가게 7분, 잘못 적힌 주소 9분이었습니다.'),
+    say(pk('food', 2, 's5'), per('food'), '16분 늦은 치킨에 별 다섯 개를 줬습니다.'),
+    say(pk('quick', 0, 'slow'), per('quick'), '분유를 주문하며 요청 사항에 “천천히 안전하게 오세요”라고 적었습니다.'),
+    say(pk('quick', 3, 's5'), per('quick'), '한밤중에 온 분유에 별 다섯 개를 줬습니다.'),
+    say(sum(d.picks.filter(x => x.route === 'dawn' && x.picks === 'call,complain')), called, '새벽 4시 38분에 전화를 받은 뒤 고객센터에 글을 남겼습니다.'),
+    say(pk('dawn', 1, 'fix'), per('dawn'), '새벽배송을 받은 뒤 주문서의 공동현관 번호를 고쳤습니다.')
+  ].join('');
+  html += panel('한 줄로 읽는 숫자', '게임에 참여한 사람들이 고른 것입니다. 인원이 30명보다 적은 줄은 한두 명에 비율이 크게 바뀝니다.', `<ul class="says">${says}</ul>`);
   html += panel('무엇이 되었나', '처음 화면에서 고른 물건입니다. 한 사람이 여러 물건을 해 보면 물건마다 한 번씩 셉니다.', bars(Object.keys(ROUTES).map(id => ({ label: ROUTES[id][0], n: per(id) })), d.plays, '판'));
   for (const id of Object.keys(ROUTES)) {
     const [name, steps] = ROUTES[id], rows = d.picks.filter(x => x.route === id), N = sum(rows);
